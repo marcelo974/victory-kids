@@ -495,6 +495,78 @@
     .stats-row { grid-template-columns: 1fr 1fr; }
     .rooms-grid { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ── MODAL PASSWORD ─────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white;
+    border-radius: 24px;
+    padding: 36px 28px;
+    width: 90%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    animation: pop 0.3s ease;
+  }
+  .modal-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .modal-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--primary-dark);
+    margin-bottom: 6px;
+  }
+  .modal-subtitle { font-size: 0.85rem; color: var(--muted); font-weight: 600; margin-bottom: 20px; }
+  .modal-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 3px;
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color .2s;
+  }
+  .modal-input:focus { border-color: var(--primary); }
+  .modal-error { color: var(--danger); font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; min-height: 20px; }
+  .modal-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .modal-btn:hover { background: var(--primary-dark); }
+  .modal-cancel {
+    display: block;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+  }
 </style>
 </head>
 <body>
@@ -502,9 +574,9 @@
 <div class="topbar">
   <div class="topbar-brand">✝️ Victory Kids</div>
   <div class="topbar-nav">
-    <button class="nav-btn active" onclick="showView('register')">📝 Registro</button>
-    <button class="nav-btn" onclick="showView('panel')">📋 Sala</button>
-    <button class="nav-btn" onclick="showView('checkout')">🚪 Retiro</button>
+    <button class="nav-btn active" id="btn-register" onclick="showView('register')">📝 Registro</button>
+    <button class="nav-btn" id="btn-panel" onclick="requestAccess('panel')">🔒 Sala</button>
+    <button class="nav-btn" id="btn-checkout" onclick="requestAccess('checkout')">🔒 Retiro</button>
   </div>
 </div>
 
@@ -883,7 +955,17 @@ function checkoutById(id) {
 }
 
 function clearSession() {
-  if (!confirm('¿Iniciar una nueva sesión? Se borrarán los registros actuales.')) return;
+  pendingAction = 'clearSession';
+  document.getElementById('modal-pwd').value = '';
+  document.getElementById('modal-error').textContent = '';
+  document.getElementById('modal-icon').textContent = '⚠️';
+  document.getElementById('modal-title').textContent = 'Confirmar nueva sesión';
+  document.getElementById('modal-subtitle').textContent = 'Ingresa la contraseña para borrar los registros actuales e iniciar una sesión nueva.';
+  document.getElementById('password-modal').classList.add('open');
+  setTimeout(() => document.getElementById('modal-pwd').focus(), 100);
+}
+
+function executeClearSession() {
   state.registrations = [];
   state.sessionDate = new Date().toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' });
   saveState();
@@ -957,6 +1039,72 @@ function checkoutFromPending(id) {
 // ══════════════════════════════════════════════
 renderRooms();
 showStep('rooms');
+
+// ══════════════════════════════════════════════
+//   CONTROL DE ACCESO
+// ══════════════════════════════════════════════
+const STAFF_PASSWORD = 'victory2024';
+let pendingView = null;
+let pendingAction = null;
+let staffUnlocked = false;
+
+function requestAccess(view) {
+  if (staffUnlocked) {
+    showView(view);
+    return;
+  }
+  pendingView = view;
+  document.getElementById('modal-pwd').value = '';
+  document.getElementById('modal-error').textContent = '';
+  document.getElementById('password-modal').classList.add('open');
+  setTimeout(() => document.getElementById('modal-pwd').focus(), 100);
+}
+
+function checkPassword() {
+  const pwd = document.getElementById('modal-pwd').value;
+  if (pwd === STAFF_PASSWORD) {
+    staffUnlocked = true;
+    closeModal();
+    if (pendingAction === 'clearSession') {
+      executeClearSession();
+    } else if (pendingView) {
+      showView(pendingView);
+      document.getElementById('btn-panel').textContent = '📋 Sala';
+      document.getElementById('btn-checkout').textContent = '🚪 Retiro';
+    }
+    pendingAction = null;
+  } else {
+    document.getElementById('modal-error').textContent = '❌ Contraseña incorrecta';
+    document.getElementById('modal-pwd').value = '';
+    document.getElementById('modal-pwd').focus();
+  }
+}
+
+function closeModal() {
+  document.getElementById('password-modal').classList.remove('open');
+  pendingView = null;
+  pendingAction = null;
+  // Restore default modal texts
+  document.getElementById('modal-icon').textContent = '🔐';
+  document.getElementById('modal-title').textContent = 'Acceso encargados';
+  document.getElementById('modal-subtitle').textContent = 'Ingresa la contraseña para continuar';
+}
+
 </script>
+
+<!-- ═══════════════════════════════════════
+     MODAL CONTRASEÑA
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="password-modal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon">🔐</div>
+    <div class="modal-title" id="modal-title">Acceso encargados</div>
+    <div class="modal-subtitle" id="modal-subtitle">Ingresa la contraseña para continuar</div>
+    <input class="modal-input" id="modal-pwd" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter') checkPassword()">
+    <div class="modal-error" id="modal-error"></div>
+    <button class="modal-btn" onclick="checkPassword()">Entrar →</button>
+    <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
 </body>
 </html>
