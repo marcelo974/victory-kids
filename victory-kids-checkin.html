@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Victory Kids — Check-in</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #F97316;
+    --primary-light: #FED7AA;
+    --primary-dark: #C2410C;
+    --accent: #7C3AED;
+    --accent-light: #EDE9FE;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --danger: #DC2626;
+    --danger-light: #FEE2E2;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --bg: #FFF7ED;
+    --card: #FFFFFF;
+    --text: #1C1917;
+    --muted: #78716C;
+    --border: #E7E5E4;
+    --radius: 20px;
+    --shadow: 0 4px 24px rgba(249,115,22,0.10);
+    --shadow-lg: 0 8px 40px rgba(249,115,22,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ─────────────────── */
+  .topbar {
+    background: var(--primary);
+    color: white;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    box-shadow: 0 2px 12px rgba(249,115,22,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topbar-nav {
+    display: flex;
+    gap: 8px;
+  }
+  .nav-btn {
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: white;
+    color: var(--primary);
+    border-color: white;
+  }
+
+  /* ── VIEWS ─────────────────── */
+  .view { display: none; padding: 28px 16px; max-width: 520px; margin: 0 auto; }
+  .view.active { display: block; }
+
+  /* ── CARD ─────────────────── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 24px;
+    margin-bottom: 20px;
+  }
+
+  /* ── HERO ─────────────────── */
+  .hero {
+    text-align: center;
+    padding: 32px 24px 24px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -30px;
+    width: 100px; height: 100px;
+    background: var(--accent-light);
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+  .hero-icon { font-size: 3.5rem; margin-bottom: 10px; position: relative; z-index: 1; }
+  .hero h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--primary);
+    line-height: 1.1;
+    position: relative; z-index: 1;
+  }
+  .hero p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    position: relative; z-index: 1;
+  }
+
+  /* ── SECTION TITLE ─────────────────── */
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── ROOMS GRID ─────────────────── */
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .room-chip {
+    border-radius: 14px;
+    padding: 14px 12px;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: all .2s;
+    text-align: center;
+  }
+  .room-chip.available { background: var(--success-light); border-color: #86EFAC; }
+  .room-chip.full { background: var(--danger-light); border-color: #FCA5A5; cursor: not-allowed; }
+  .room-chip.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249,115,22,0.2); }
+  .room-chip-name { font-weight: 800; font-size: 0.9rem; }
+  .room-chip-age { font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .room-chip-cupo { font-size: 0.8rem; font-weight: 700; margin-top: 6px; }
+  .room-chip.available .room-chip-cupo { color: var(--success); }
+  .room-chip.full .room-chip-cupo { color: var(--danger); }
+
+  /* ── FORM ─────────────────── */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-weight: 800;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    background: #FAFAF9;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+    background: white;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── BTN ─────────────────── */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: center;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 14px rgba(249,115,22,0.35);
+  }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-primary:disabled { background: #D6D3D1; box-shadow: none; cursor: not-allowed; transform: none; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+  .btn-ghost:hover { background: var(--primary-light); }
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+    box-shadow: 0 4px 14px rgba(220,38,38,0.25);
+    width: auto;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+  .btn-success-sm {
+    background: var(--success);
+    color: white;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  /* ── TICKET ─────────────────── */
+  .ticket {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .ticket::before {
+    content: '🎉';
+    font-size: 4rem;
+    position: absolute;
+    top: -10px; right: -10px;
+    opacity: 0.15;
+    transform: rotate(20deg);
+  }
+  .ticket-label { font-size: 0.85rem; font-weight: 700; opacity: 0.85; margin-bottom: 8px; }
+  .ticket-code {
+    font-family: 'Fredoka One', cursive;
+    font-size: 4.5rem;
+    letter-spacing: 8px;
+    line-height: 1;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .ticket-name { font-size: 1.1rem; font-weight: 800; margin-top: 12px; opacity: 0.9; }
+  .ticket-room {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+  .ticket-warn {
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── PANEL SALA ─────────────────── */
+  .panel-view { display: none; padding: 20px 16px; max-width: 720px; margin: 0 auto; }
+  .panel-view.active { display: block; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--primary);
+  }
+  .stat-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); margin-top: 2px; }
+
+  .room-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    background: white;
+    color: var(--muted);
+    transition: all .2s;
+  }
+  .filter-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+
+  .kids-list { display: flex; flex-direction: column; gap: 10px; }
+  .kid-row {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: var(--shadow);
+    transition: opacity .3s;
+  }
+  .kid-row.checked-out { opacity: 0.45; }
+  .kid-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .kid-info { flex: 1; }
+  .kid-name { font-weight: 800; font-size: 0.95rem; }
+  .kid-detail { font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .kid-code {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--primary);
+    letter-spacing: 2px;
+    margin-right: 8px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+  .badge-active { background: var(--success-light); color: var(--success); }
+  .badge-out { background: var(--border); color: var(--muted); }
+  .badge-room {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  /* ── CHECKOUT SEARCH ─────────────────── */
+  .checkout-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .checkout-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-align: center;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .checkout-input:focus { border-color: var(--primary); }
+
+  /* ── ALERT ─────────────────── */
+  .alert {
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .alert-success { background: var(--success-light); color: var(--success); }
+  .alert-danger { background: var(--danger-light); color: var(--danger); }
+  .alert-info { background: var(--accent-light); color: var(--accent); }
+  .alert-warning { background: var(--warning-light); color: var(--warning); }
+
+  /* ── SESSION HEADER ─────────────────── */
+  .session-bar {
+    background: var(--accent);
+    color: white;
+    border-radius: 14px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(124,58,237,0.25);
+  }
+  .session-info { font-weight: 700; font-size: 0.88rem; }
+  .session-date { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
+  .btn-new-session {
+    background: rgba(255,255,255,0.2);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  /* ── EMPTY STATE ─────────────────── */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 10px; }
+  .empty p { font-weight: 600; font-size: 0.9rem; }
+
+  /* ── ANIMATIONS ─────────────────── */
+  @keyframes pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    70% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop { animation: pop 0.4s ease; }
+
+  @keyframes slideUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .slide-up { animation: slideUp 0.3s ease; }
+
+  /* ── RESPONSIVE ─────────────────── */
+  @media (max-width: 480px) {
+    .form-row { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .rooms-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">✝️ Victory Kids</div>
+  <div class="topbar-nav">
+    <button class="nav-btn active" onclick="showView('register')">📝 Registro</button>
+    <button class="nav-btn" onclick="showView('panel')">📋 Sala</button>
+    <button class="nav-btn" onclick="showView('checkout')">🚪 Retiro</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VISTA 1 — REGISTRO (padres)
+════════════════════════════════════════ -->
+<div id="view-register" class="view active">
+
+  <div id="step-rooms">
+    <div class="hero">
+      <div class="hero-icon">👶</div>
+      <h1>Registro de Niños</h1>
+      <p>Selecciona la sala según la edad de tu hijo</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">🏫 Salas disponibles</div>
+      <div class="rooms-grid" id="rooms-grid"></div>
+      <div id="room-alert"></div>
+    </div>
+  </div>
+
+  <div id="step-form" style="display:none">
+    <div class="card slide-up">
+      <div class="section-title">✏️ Datos del niño</div>
+
+      <div class="form-group">
+        <label class="form-label">Nombre del niño *</label>
+        <input class="form-input" id="f-childname" type="text" placeholder="Ej: Sofía González">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Edad *</label>
+          <input class="form-input" id="f-age" type="number" min="0" max="12" placeholder="Ej: 4">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sala asignada</label>
+          <input class="form-input" id="f-room-display" readonly style="background:#F5F5F4; color:var(--muted);">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nombre del padre/tutor *</label>
+        <input class="form-input" id="f-parentname" type="text" placeholder="Ej: Carlos González">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono (opcional)</label>
+        <input class="form-input" id="f-phone" type="tel" placeholder="Ej: +56 9 1234 5678">
+      </div>
+
+      <div id="form-alert"></div>
+
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn btn-ghost" onclick="showStep('rooms')" style="width:auto; padding:14px 20px;">← Volver</button>
+        <button class="btn btn-primary" onclick="submitRegistration()">Registrar ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="step-ticket" style="display:none">
+    <div class="ticket pop" id="ticket-box"></div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="newRegistration()">+ Registrar otro niño</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     VISTA 2 — PANEL DE SALA (encargados)
+════════════════════════════════════════ -->
+<div id="view-panel" class="panel-view">
+
+  <div class="session-bar">
+    <div>
+      <div class="session-info">🗓️ Reunión en curso</div>
+      <div class="session-date" id="session-date"></div>
+    </div>
+    <button class="btn-new-session" onclick="clearSession()">Nueva sesión</button>
+  </div>
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="room-filter" id="room-filter">
+    <button class="filter-pill active" onclick="filterRoom('all', this)">Todas las salas</button>
+  </div>
+
+  <div class="card">
+    <div class="section-title">👦 Niños registrados</div>
+    <div class="kids-list" id="kids-list">
+      <div class="empty">
+        <div class="empty-icon">🌟</div>
+        <p>Aún no hay niños registrados</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     VISTA 3 — RETIRO (checkout)
+════════════════════════════════════════ -->
+<div id="view-checkout" class="view">
+
+  <div class="hero">
+    <div class="hero-icon">🚪</div>
+    <h1>Retiro de niños</h1>
+    <p>Ingresa el código para retirar</p>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🔢 Código de retiro</div>
+    <div class="checkout-box" style="flex-direction:column; align-items:stretch;">
+      <input class="checkout-input" id="checkout-code" type="text" maxlength="4" placeholder="0000" oninput="this.value=this.value.toUpperCase()">
+      <button class="btn btn-primary" onclick="doCheckout()" style="margin-top:10px;">Buscar y retirar →</button>
+    </div>
+    <div id="checkout-result"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">📋 Pendientes de retiro</div>
+    <div class="kids-list" id="pending-list"></div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//   DATOS Y ESTADO
+// ══════════════════════════════════════════════
+
+const ROOMS = [
+  { id: 'bebes',    name: 'Bebés',           ageMin: 0,  ageMax: 2,  capacity: 10, emoji: '🍼', color: '#FCE7F3' },
+  { id: 'parvulos', name: 'Pequeños',        ageMin: 3,  ageMax: 5,  capacity: 15, emoji: '🧸', color: '#FEF9C3' },
+  { id: 'ninos',    name: 'Niños',           ageMin: 6,  ageMax: 9,  capacity: 20, emoji: '⚽', color: '#DBEAFE' },
+  { id: 'preadol',  name: 'Preadolescentes', ageMin: 10, ageMax: 12, capacity: 20, emoji: '🎮', color: '#F0FDF4' },
+];
+
+let state = {
+  registrations: JSON.parse(localStorage.getItem('vk_registrations') || '[]'),
+  sessionDate: localStorage.getItem('vk_session') || new Date().toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' }),
+  selectedRoom: null,
+};
+
+function saveState() {
+  localStorage.setItem('vk_registrations', JSON.stringify(state.registrations));
+  localStorage.setItem('vk_session', state.sessionDate);
+}
+
+function getRoomCount(roomId) {
+  return state.registrations.filter(r => r.room === roomId && !r.checkedOut).length;
+}
+
+function getRoomCapacity(roomId) {
+  return ROOMS.find(r => r.id === roomId)?.capacity || 0;
+}
+
+function getRoomByAge(age) {
+  return ROOMS.find(r => age >= r.ageMin && age <= r.ageMax) || null;
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  // Make sure unique
+  if (state.registrations.some(r => r.code === code)) return generateCode();
+  return code;
+}
+
+// ══════════════════════════════════════════════
+//   NAVEGACIÓN
+// ══════════════════════════════════════════════
+
+function showView(v) {
+  document.querySelectorAll('.view, .panel-view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+  const el = document.getElementById('view-' + v);
+  if (el) el.classList.add('active');
+
+  const btns = { register: 0, panel: 1, checkout: 2 };
+  document.querySelectorAll('.nav-btn')[btns[v]]?.classList.add('active');
+
+  if (v === 'panel') renderPanel();
+  if (v === 'checkout') renderPending();
+}
+
+function showStep(step) {
+  document.getElementById('step-rooms').style.display = step === 'rooms' ? '' : 'none';
+  document.getElementById('step-form').style.display = step === 'form' ? '' : 'none';
+  document.getElementById('step-ticket').style.display = step === 'ticket' ? '' : 'none';
+}
+
+// ══════════════════════════════════════════════
+//   REGISTRO — Salas
+// ══════════════════════════════════════════════
+
+function renderRooms() {
+  const grid = document.getElementById('rooms-grid');
+  grid.innerHTML = ROOMS.map(room => {
+    const count = getRoomCount(room.id);
+    const full = count >= room.capacity;
+    return `
+    <div class="room-chip ${full ? 'full' : 'available'}" onclick="${full ? '' : `selectRoom('${room.id}')`}" id="chip-${room.id}">
+      <div style="font-size:1.8rem">${room.emoji}</div>
+      <div class="room-chip-name">${room.name}</div>
+      <div class="room-chip-age">${room.ageMin}–${room.ageMax} años</div>
+      <div class="room-chip-cupo">${full ? '🔴 Sin cupo' : `✅ ${room.capacity - count} cupos`}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectRoom(roomId) {
+  state.selectedRoom = ROOMS.find(r => r.id === roomId);
+  document.querySelectorAll('.room-chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('chip-' + roomId)?.classList.add('selected');
+  document.getElementById('f-room-display').value = state.selectedRoom.name;
+  setTimeout(() => showStep('form'), 300);
+}
+
+// ══════════════════════════════════════════════
+//   REGISTRO — Formulario
+// ══════════════════════════════════════════════
+
+function submitRegistration() {
+  const childName = document.getElementById('f-childname').value.trim();
+  const age = parseInt(document.getElementById('f-age').value);
+  const parentName = document.getElementById('f-parentname').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const alert = document.getElementById('form-alert');
+
+  if (!childName || !parentName || isNaN(age)) {
+    alert.innerHTML = `<div class="alert alert-danger">⚠️ Por favor completa todos los campos obligatorios.</div>`;
+    return;
+  }
+
+  // Verificar que la edad coincide con la sala
+  const correctRoom = getRoomByAge(age);
+  if (!correctRoom || correctRoom.id !== state.selectedRoom.id) {
+    alert.innerHTML = `<div class="alert alert-warning">⚠️ La edad ingresada (${age} años) no coincide con la sala seleccionada.<br>Sala correcta: ${correctRoom ? correctRoom.name : 'No aplica (rango fuera de cobertura)'}.</div>`;
+    return;
+  }
+
+  // Verificar cupo
+  const count = getRoomCount(state.selectedRoom.id);
+  if (count >= state.selectedRoom.capacity) {
+    alert.innerHTML = `<div class="alert alert-danger">🔴 Lo sentimos, la sala <strong>${state.selectedRoom.name}</strong> ya no tiene cupo disponible.</div>`;
+    return;
+  }
+
+  const code = generateCode();
+  const reg = {
+    id: Date.now(),
+    code,
+    childName,
+    age,
+    parentName,
+    phone,
+    room: state.selectedRoom.id,
+    roomName: state.selectedRoom.name,
+    emoji: state.selectedRoom.emoji,
+    time: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+    checkedOut: false,
+  };
+
+  state.registrations.push(reg);
+  saveState();
+
+  // Mostrar ticket
+  renderTicket(reg);
+  showStep('ticket');
+  alert.innerHTML = '';
+}
+
+function renderTicket(reg) {
+  document.getElementById('ticket-box').innerHTML = `
+    <div class="ticket-label">📋 CÓDIGO DE RETIRO</div>
+    <div class="ticket-code">${reg.code}</div>
+    <div class="ticket-name">👦 ${reg.childName}, ${reg.age} años</div>
+    <div><span class="ticket-room">${reg.emoji} Sala: ${reg.roomName}</span></div>
+    <div class="ticket-warn">
+      ⚠️ Guarda este código — lo necesitarás para retirar a tu hijo
+    </div>
+  `;
+}
+
+function newRegistration() {
+  document.getElementById('f-childname').value = '';
+  document.getElementById('f-age').value = '';
+  document.getElementById('f-parentname').value = '';
+  document.getElementById('f-phone').value = '';
+  document.getElementById('form-alert').innerHTML = '';
+  state.selectedRoom = null;
+  renderRooms();
+  showStep('rooms');
+}
+
+// ══════════════════════════════════════════════
+//   PANEL DE SALA
+// ══════════════════════════════════════════════
+
+let currentFilter = 'all';
+
+function renderPanel() {
+  // Session date
+  document.getElementById('session-date').textContent = state.sessionDate;
+
+  // Stats
+  const total = state.registrations.length;
+  const active = state.registrations.filter(r => !r.checkedOut).length;
+  const out = state.registrations.filter(r => r.checkedOut).length;
+  const rooms_used = [...new Set(state.registrations.map(r => r.room))].length;
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--success)">${active}</div><div class="stat-label">En sala</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--muted)">${out}</div><div class="stat-label">Retirados</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${rooms_used}</div><div class="stat-label">Salas</div></div>
+  `;
+
+  // Filters
+  const filterDiv = document.getElementById('room-filter');
+  const activeRooms = [...new Set(state.registrations.map(r => r.room))];
+  const roomBtns = activeRooms.map(rid => {
+    const room = ROOMS.find(r => r.id === rid);
+    const count = getRoomCount(rid);
+    return `<button class="filter-pill ${currentFilter === rid ? 'active' : ''}" onclick="filterRoom('${rid}', this)">${room.emoji} ${room.name} (${count})</button>`;
+  }).join('');
+  filterDiv.innerHTML = `<button class="filter-pill ${currentFilter === 'all' ? 'active' : ''}" onclick="filterRoom('all', this)">Todas</button>` + roomBtns;
+
+  renderKidsList();
+}
+
+function filterRoom(roomId, btn) {
+  currentFilter = roomId;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderKidsList();
+}
+
+function renderKidsList() {
+  const list = document.getElementById('kids-list');
+  let regs = state.registrations;
+  if (currentFilter !== 'all') regs = regs.filter(r => r.room === currentFilter);
+
+  if (!regs.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🌟</div><p>Sin registros en esta sala</p></div>`;
+    return;
+  }
+
+  list.innerHTML = regs.map(reg => {
+    const room = ROOMS.find(r => r.id === reg.room);
+    return `
+    <div class="kid-row ${reg.checkedOut ? 'checked-out' : ''}" id="row-${reg.id}">
+      <div class="kid-avatar" style="background:${room?.color || '#F5F5F4'}">${reg.emoji}</div>
+      <div class="kid-info">
+        <div class="kid-name">${reg.childName}</div>
+        <div class="kid-detail">${reg.age} años · ${reg.parentName} · ${reg.time}</div>
+        <div style="margin-top:4px">
+          <span class="badge-room">${reg.roomName}</span>
+          <span class="badge ${reg.checkedOut ? 'badge-out' : 'badge-active'}" style="margin-left:4px">${reg.checkedOut ? 'Retirado' : '✅ En sala'}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="kid-code">${reg.code}</div>
+        ${!reg.checkedOut ? `<button class="btn-success-sm" onclick="checkoutById(${reg.id})">Retirar</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function checkoutById(id) {
+  const reg = state.registrations.find(r => r.id === id);
+  if (reg) { reg.checkedOut = true; saveState(); }
+  renderPanel();
+}
+
+function clearSession() {
+  if (!confirm('¿Iniciar una nueva sesión? Se borrarán los registros actuales.')) return;
+  state.registrations = [];
+  state.sessionDate = new Date().toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' });
+  saveState();
+  renderPanel();
+}
+
+// ══════════════════════════════════════════════
+//   RETIRO
+// ══════════════════════════════════════════════
+
+function doCheckout() {
+  const code = document.getElementById('checkout-code').value.trim().toUpperCase();
+  const result = document.getElementById('checkout-result');
+
+  if (!code || code.length < 4) {
+    result.innerHTML = `<div class="alert alert-warning">⚠️ Ingresa el código de 4 caracteres.</div>`;
+    return;
+  }
+
+  const reg = state.registrations.find(r => r.code === code);
+  if (!reg) {
+    result.innerHTML = `<div class="alert alert-danger">❌ Código no encontrado. Verifica e intenta nuevamente.</div>`;
+    return;
+  }
+  if (reg.checkedOut) {
+    result.innerHTML = `<div class="alert alert-info">ℹ️ <strong>${reg.childName}</strong> ya fue retirado anteriormente.</div>`;
+    return;
+  }
+
+  reg.checkedOut = true;
+  saveState();
+
+  result.innerHTML = `
+    <div class="alert alert-success pop">
+      ✅ <strong>${reg.childName}</strong> entregado a ${reg.parentName} correctamente.
+    </div>`;
+  document.getElementById('checkout-code').value = '';
+  renderPending();
+}
+
+function renderPending() {
+  const list = document.getElementById('pending-list');
+  const pending = state.registrations.filter(r => !r.checkedOut);
+  if (!pending.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🎉</div><p>Todos los niños fueron retirados</p></div>`;
+    return;
+  }
+  list.innerHTML = pending.map(reg => `
+    <div class="kid-row" style="margin-bottom:0">
+      <div class="kid-avatar" style="font-size:1.4rem">👦</div>
+      <div class="kid-info">
+        <div class="kid-name">${reg.childName}</div>
+        <div class="kid-detail">${reg.roomName} · ${reg.parentName}</div>
+      </div>
+      <div class="kid-code">${reg.code}</div>
+      <button class="btn-success-sm" onclick="checkoutFromPending(${reg.id})">Retirar</button>
+    </div>
+  `).join('');
+}
+
+function checkoutFromPending(id) {
+  const reg = state.registrations.find(r => r.id === id);
+  if (reg) { reg.checkedOut = true; saveState(); }
+  renderPending();
+  document.getElementById('checkout-result').innerHTML = `
+    <div class="alert alert-success pop">✅ <strong>${reg.childName}</strong> retirado correctamente.</div>`;
+}
+
+// ══════════════════════════════════════════════
+//   INIT
+// ══════════════════════════════════════════════
+renderRooms();
+showStep('rooms');
+</script>
+</body>
+</html>
