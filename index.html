@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Victory Kids — Check-in</title>
+<title>Guardería — Check-in</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -572,7 +572,7 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-brand">✝️ Victory Kids</div>
+  <div class="topbar-brand"><img src="https://raw.githubusercontent.com/marcelo974/victory-kids/main/Logo_1.png" alt="Victory Church" style="height:36px; filter:brightness(0) invert(1);"></div>
   <div class="topbar-nav">
     <button class="nav-btn active" id="btn-register" onclick="showView('register')">📝 Registro</button>
     <button class="nav-btn" id="btn-panel" onclick="requestAccess('panel')">🔒 Sala</button>
@@ -588,7 +588,7 @@
   <div id="step-rooms">
     <div class="hero">
       <div class="hero-icon">👶</div>
-      <h1>Registro de Niños</h1>
+      <h1>Guardería Check-in</h1>
       <p>Selecciona la sala según la edad de tu hijo</p>
     </div>
 
@@ -708,10 +708,10 @@
 // ══════════════════════════════════════════════
 
 const ROOMS = [
-  { id: 'bebes',    name: 'Bebés',           ageMin: 0,  ageMax: 2,  capacity: 10, emoji: '🍼', color: '#FCE7F3' },
-  { id: 'parvulos', name: 'Pequeños',        ageMin: 3,  ageMax: 5,  capacity: 15, emoji: '🧸', color: '#FEF9C3' },
-  { id: 'ninos',    name: 'Niños',           ageMin: 6,  ageMax: 9,  capacity: 20, emoji: '⚽', color: '#DBEAFE' },
-  { id: 'preadol',  name: 'Preadolescentes', ageMin: 10, ageMax: 12, capacity: 20, emoji: '🎮', color: '#F0FDF4' },
+  { id: 'guarderia1', name: 'Guardería 1-3',  ageMin: 1,  ageMax: 3,  capacity: 10, emoji: '🍼', color: '#FCE7F3' },
+  { id: 'guarderia2', name: 'Guardería 4-5',  ageMin: 4,  ageMax: 5,  capacity: 30, emoji: '🧸', color: '#FEF9C3' },
+  { id: 'guarderia3', name: 'Guardería 6-7',  ageMin: 6,  ageMax: 7,  capacity: 30, emoji: '⚽', color: '#DBEAFE' },
+  { id: 'guarderia4', name: 'Guardería 8-11', ageMin: 8,  ageMax: 11, capacity: 40, emoji: '🎮', color: '#F0FDF4' },
 ];
 
 let state = {
