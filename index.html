@@ -31,6 +31,7 @@
   body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   .topbar { background: var(--primary); color: white; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; box-shadow: 0 2px 12px rgba(249,115,22,0.3); position: sticky; top: 0; z-index: 100; }
   .topbar-brand { font-family: 'Fredoka One', cursive; font-size: 1.4rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+  .topbar-brand img { height: 36px; width: 36px; object-fit: contain; border-radius: 6px; }
   .topbar-nav { display: flex; gap: 8px; }
   .nav-btn { background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.35); color: white; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; padding: 6px 14px; border-radius: 30px; cursor: pointer; transition: all .2s; }
   .nav-btn:hover, .nav-btn.active { background: white; color: var(--primary); border-color: white; }
@@ -65,7 +66,6 @@
   .btn-primary:disabled { background: #D6D3D1; box-shadow: none; cursor: not-allowed; transform: none; }
   .btn-ghost { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
   .btn-ghost:hover { background: var(--primary-light); }
-  .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 14px rgba(220,38,38,0.25); width: auto; padding: 8px 16px; font-size: 0.8rem; border-radius: 10px; }
   .btn-success-sm { background: var(--success); color: white; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; padding: 8px 16px; border-radius: 10px; cursor: pointer; transition: all .2s; }
   .ticket { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-radius: var(--radius); padding: 32px 24px; text-align: center; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
   .ticket::before { content: '🎉'; font-size: 4rem; position: absolute; top: -10px; right: -10px; opacity: 0.15; transform: rotate(20deg); }
@@ -90,6 +90,7 @@
   .kid-info { flex: 1; }
   .kid-name { font-weight: 800; font-size: 0.95rem; }
   .kid-detail { font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .kid-phone { font-size: 0.78rem; color: var(--primary-dark); font-weight: 700; margin-top: 3px; }
   .kid-code { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary); letter-spacing: 2px; margin-right: 8px; }
   .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; }
   .badge-active { background: var(--success-light); color: var(--success); }
@@ -132,7 +133,10 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-brand">🏠 Victory Kids</div>
+  <div class="topbar-brand">
+    <img src="data:image/png;base64,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" alt="logo" />
+    Victory Kids
+  </div>
   <div class="topbar-nav">
     <button class="nav-btn active" id="btn-register" onclick="showView('register')">📝 Registro</button>
     <button class="nav-btn" id="btn-panel" onclick="requestAccess('panel')">🔒 Sala</button>
@@ -176,7 +180,7 @@
         <input class="form-input" id="f-parentname" type="text" placeholder="Ej: Carlos González">
       </div>
       <div class="form-group">
-        <label class="form-label">Teléfono (opcional)</label>
+        <label class="form-label">Teléfono *</label>
         <input class="form-input" id="f-phone" type="tel" placeholder="Ej: +54 9 11 1234 5678">
       </div>
       <div id="form-alert"></div>
@@ -346,7 +350,7 @@ function submitRegistration() {
   const phone = document.getElementById('f-phone').value.trim();
   const alertEl = document.getElementById('form-alert');
 
-  if (!childName || !parentName || isNaN(age)) {
+  if (!childName || !parentName || isNaN(age) || !phone) {
     alertEl.innerHTML = `<div class="alert alert-danger">⚠️ Por favor completa todos los campos obligatorios.</div>`;
     return;
   }
@@ -448,6 +452,7 @@ function renderKidsList() {
       <div class="kid-info">
         <div class="kid-name">${reg.childName}</div>
         <div class="kid-detail">${reg.age} años · ${reg.parentName} · ${reg.time}</div>
+        ${reg.phone ? `<div class="kid-phone">📞 ${reg.phone}</div>` : ''}
         <div style="margin-top:4px">
           <span class="badge-room">${reg.roomName}</span>
           <span class="badge ${reg.checkedOut ? 'badge-out' : 'badge-active'}" style="margin-left:4px">${reg.checkedOut ? 'Retirado' : '✅ En sala'}</span>
@@ -521,6 +526,7 @@ function renderPending() {
       <div class="kid-info">
         <div class="kid-name">${reg.childName}</div>
         <div class="kid-detail">${reg.roomName} · ${reg.parentName}</div>
+        ${reg.phone ? `<div class="kid-phone">📞 ${reg.phone}</div>` : ''}
       </div>
       <div class="kid-code">${reg.code}</div>
       <button class="btn-success-sm" onclick="checkoutFromPending(${reg.id})">Retirar</button>
@@ -552,19 +558,21 @@ function requestAccess(view) {
   setTimeout(() => document.getElementById('modal-pwd').focus(), 100);
 }
 
+// ✅ FIX: guardamos action y view ANTES de cerrar el modal
 function checkPassword() {
   const pwd = document.getElementById('modal-pwd').value;
   if (pwd === STAFF_PASSWORD) {
     staffUnlocked = true;
+    const action = pendingAction;
+    const view = pendingView;
     closeModal();
-    if (pendingAction === 'clearSession') {
+    if (action === 'clearSession') {
       executeClearSession();
-    } else if (pendingView) {
-      showView(pendingView);
+    } else if (view) {
+      showView(view);
       document.getElementById('btn-panel').textContent = '📋 Sala';
       document.getElementById('btn-checkout').textContent = '🚪 Retiro';
     }
-    pendingAction = null;
   } else {
     document.getElementById('modal-error').textContent = '❌ Contraseña incorrecta';
     document.getElementById('modal-pwd').value = '';
@@ -596,5 +604,3 @@ function closeModal() {
 </div>
 </body>
 </html>
-
-
