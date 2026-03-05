@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Victory Kids — Check-in</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+
+<!-- Firebase PRIMERO en el head para que esté disponible antes que el código -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <style>
   :root {
     --primary: #F97316;
@@ -43,7 +48,7 @@
 
   .hero { text-align: center; padding: 32px 24px 24px; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; position: relative; overflow: hidden; }
   .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 140px; height: 140px; background: var(--primary-light); border-radius: 50%; opacity: 0.5; }
-  .hero::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; background: var(--accent-light); border-radius: 50%; opacity: 0.5; }
+  .hero::after  { content: ''; position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; background: var(--accent-light); border-radius: 50%; opacity: 0.5; }
   .hero-icon { font-size: 3.5rem; margin-bottom: 10px; position: relative; z-index: 1; }
   .hero h1 { font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--primary); line-height: 1.1; position: relative; z-index: 1; }
   .hero p { color: var(--muted); margin-top: 6px; font-size: 0.95rem; font-weight: 600; position: relative; z-index: 1; }
@@ -53,13 +58,13 @@
   .rooms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
   .room-chip { border-radius: 14px; padding: 14px 12px; cursor: pointer; border: 2.5px solid transparent; transition: all .2s; text-align: center; }
   .room-chip.available { background: var(--success-light); border-color: #86EFAC; }
-  .room-chip.full { background: var(--danger-light); border-color: #FCA5A5; cursor: not-allowed; }
-  .room-chip.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249,115,22,0.2); }
+  .room-chip.full      { background: var(--danger-light);  border-color: #FCA5A5; cursor: not-allowed; }
+  .room-chip.selected  { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249,115,22,0.2); }
   .room-chip-name { font-weight: 800; font-size: 0.9rem; }
-  .room-chip-age { font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .room-chip-age  { font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
   .room-chip-cupo { font-size: 0.8rem; font-weight: 700; margin-top: 6px; }
   .room-chip.available .room-chip-cupo { color: var(--success); }
-  .room-chip.full .room-chip-cupo { color: var(--danger); }
+  .room-chip.full      .room-chip-cupo { color: var(--danger); }
 
   .form-group { margin-bottom: 16px; }
   .form-label { display: block; font-weight: 800; font-size: 0.85rem; margin-bottom: 6px; color: var(--text); }
@@ -70,34 +75,34 @@
   .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; transition: all .2s; text-align: center; }
   .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(249,115,22,0.35); }
   .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
-  .btn-ghost { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-  .btn-ghost:hover { background: var(--primary-light); }
-  .btn-danger { background: transparent; color: var(--danger); border: 2px solid var(--danger); }
+  .btn-ghost   { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+  .btn-ghost:hover  { background: var(--primary-light); }
+  .btn-danger  { background: transparent; color: var(--danger);  border: 2px solid var(--danger); }
   .btn-danger:hover { background: var(--danger-light); }
   .btn-success-sm { background: var(--success); color: white; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; padding: 8px 16px; border-radius: 10px; cursor: pointer; transition: all .2s; }
 
   .phone-actions { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
   .btn-phone { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; cursor: pointer; border: none; transition: all .2s; }
-  .btn-copy { background: #FED7AA; color: #C2410C; }
-  .btn-copy:hover { background: #FDBA74; }
+  .btn-copy        { background: #FED7AA; color: #C2410C; }
+  .btn-copy:hover  { background: #FDBA74; }
   .btn-copy.copied { background: #DCFCE7; color: #16A34A; }
-  .btn-wa { background: #DCFCE7; color: #16A34A; }
-  .btn-wa:hover { background: #BBF7D0; }
+  .btn-wa          { background: #DCFCE7; color: #16A34A; }
+  .btn-wa:hover    { background: #BBF7D0; }
 
   .ticket { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-radius: var(--radius); padding: 32px 24px; text-align: center; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
   .ticket::before { content: '🎉'; font-size: 4rem; position: absolute; top: -10px; right: -10px; opacity: 0.15; transform: rotate(20deg); }
   .ticket-label { font-size: 0.85rem; font-weight: 700; opacity: 0.85; margin-bottom: 8px; }
-  .ticket-code { font-family: 'Fredoka One', cursive; font-size: 4.5rem; letter-spacing: 8px; line-height: 1; text-shadow: 0 2px 12px rgba(0,0,0,0.2); }
-  .ticket-name { font-size: 1.1rem; font-weight: 800; margin-top: 12px; opacity: 0.9; }
-  .ticket-room { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; font-weight: 700; margin-top: 8px; }
-  .ticket-warn { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 10px 14px; font-size: 0.8rem; font-weight: 700; margin-top: 18px; display: flex; align-items: center; gap: 6px; }
+  .ticket-code  { font-family: 'Fredoka One', cursive; font-size: 4.5rem; letter-spacing: 8px; line-height: 1; text-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+  .ticket-name  { font-size: 1.1rem; font-weight: 800; margin-top: 12px; opacity: 0.9; }
+  .ticket-room  { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; font-weight: 700; margin-top: 8px; }
+  .ticket-warn  { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 10px 14px; font-size: 0.8rem; font-weight: 700; margin-top: 18px; display: flex; align-items: center; gap: 6px; }
 
   .panel-view { display: none; padding: 20px 16px; max-width: 720px; margin: 0 auto; }
   .panel-view.active { display: block; }
 
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-  .stat-card { background: var(--card); border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: var(--shadow); }
-  .stat-num { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--primary); }
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card  { background: var(--card); border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: var(--shadow); }
+  .stat-num   { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--primary); }
   .stat-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); margin-top: 2px; }
 
   .room-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -108,39 +113,39 @@
   .kid-row { background: var(--card); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow); transition: opacity .3s; }
   .kid-row.checked-out { opacity: 0.45; }
   .kid-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
-  .kid-info { flex: 1; min-width: 0; }
-  .kid-name { font-weight: 800; font-size: 0.95rem; }
+  .kid-info   { flex: 1; min-width: 0; }
+  .kid-name   { font-weight: 800; font-size: 0.95rem; }
   .kid-detail { font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
-  .kid-code { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary); letter-spacing: 2px; flex-shrink: 0; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; }
+  .kid-code   { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary); letter-spacing: 2px; flex-shrink: 0; }
+  .badge        { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; }
   .badge-active { background: var(--success-light); color: var(--success); }
-  .badge-out { background: var(--border); color: var(--muted); }
-  .badge-room { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--accent-light); color: var(--accent); }
+  .badge-out    { background: var(--border); color: var(--muted); }
+  .badge-room   { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--accent-light); color: var(--accent); }
 
   .checkout-input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800; letter-spacing: 3px; text-align: center; outline: none; transition: border-color .2s; margin-bottom: 10px; }
   .checkout-input:focus { border-color: var(--primary); }
 
-  .alert { border-radius: 12px; padding: 12px 16px; font-weight: 700; font-size: 0.9rem; margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+  .alert         { border-radius: 12px; padding: 12px 16px; font-weight: 700; font-size: 0.9rem; margin-top: 12px; display: flex; align-items: center; gap: 8px; }
   .alert-success { background: var(--success-light); color: var(--success); }
-  .alert-danger { background: var(--danger-light); color: var(--danger); }
-  .alert-info { background: var(--accent-light); color: var(--accent); }
+  .alert-danger  { background: var(--danger-light);  color: var(--danger); }
+  .alert-info    { background: var(--accent-light);  color: var(--accent); }
   .alert-warning { background: var(--warning-light); color: var(--warning); }
 
-  .session-bar { background: var(--accent); color: white; border-radius: 14px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(124,58,237,0.25); }
+  .session-bar  { background: var(--accent); color: white; border-radius: 14px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(124,58,237,0.25); }
   .session-info { font-weight: 700; font-size: 0.88rem; }
   .session-date { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
   .btn-new-session { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); color: white; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
 
-  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty      { text-align: center; padding: 40px 20px; color: var(--muted); }
   .empty-icon { font-size: 3rem; margin-bottom: 10px; }
-  .empty p { font-weight: 600; font-size: 0.9rem; }
+  .empty p    { font-weight: 600; font-size: 0.9rem; }
 
-  @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
-  .pop { animation: pop 0.4s ease; }
+  @keyframes pop     { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
   @keyframes slideUp { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .pop      { animation: pop     0.4s ease; }
   .slide-up { animation: slideUp 0.3s ease; }
 
-  @media (max-width: 480px) {
+  @media (max-width:480px) {
     .form-row { grid-template-columns: 1fr; }
     .stats-row { grid-template-columns: 1fr 1fr; }
     .topbar-brand span { display: none; }
@@ -148,14 +153,14 @@
 
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal-box { background: white; border-radius: 24px; padding: 36px 28px; width: 90%; max-width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: pop 0.3s ease; }
-  .modal-icon { font-size: 2.5rem; margin-bottom: 10px; }
-  .modal-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary-dark); margin-bottom: 6px; }
+  .modal-box      { background: white; border-radius: 24px; padding: 36px 28px; width: 90%; max-width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: pop 0.3s ease; }
+  .modal-icon     { font-size: 2.5rem; margin-bottom: 10px; }
+  .modal-title    { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary-dark); margin-bottom: 6px; }
   .modal-subtitle { font-size: 0.85rem; color: var(--muted); font-weight: 600; margin-bottom: 20px; }
-  .modal-input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; text-align: center; letter-spacing: 3px; outline: none; margin-bottom: 10px; transition: border-color .2s; }
+  .modal-input    { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; text-align: center; letter-spacing: 3px; outline: none; margin-bottom: 10px; transition: border-color .2s; }
   .modal-input:focus { border-color: var(--primary); }
-  .modal-error { color: var(--danger); font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; min-height: 20px; }
-  .modal-btn { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: background .2s; }
+  .modal-error  { color: var(--danger); font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; min-height: 20px; }
+  .modal-btn    { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: background .2s; }
   .modal-btn:hover { background: var(--primary-dark); }
   .modal-cancel { display: block; margin-top: 10px; color: var(--muted); font-size: 0.8rem; font-weight: 700; cursor: pointer; background: none; border: none; width: 100%; }
 
@@ -295,13 +300,13 @@
         <input class="form-input" type="date" id="cfg-date">
       </div>
       <div class="form-group">
-        <label class="form-label">🕐 Hora (hora local)</label>
+        <label class="form-label">🕐 Hora (local)</label>
         <input class="form-input" type="time" id="cfg-time">
       </div>
     </div>
     <div id="cfg-status" style="margin-bottom:12px;"></div>
     <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar configuración</button>
-    <button class="btn btn-danger"  onclick="clearConfig()" style="margin-top:10px;">🗑️ Quitar restricción de horario</button>
+    <button class="btn btn-danger"  onclick="clearConfig()" style="margin-top:10px;">🗑️ Quitar restricción</button>
   </div>
 </div>
 
@@ -317,8 +322,8 @@
 <!-- MODAL CONTRASEÑA -->
 <div class="modal-overlay" id="password-modal">
   <div class="modal-box">
-    <div class="modal-icon"    id="modal-icon">🔐</div>
-    <div class="modal-title"   id="modal-title">Acceso encargados</div>
+    <div class="modal-icon"     id="modal-icon">🔐</div>
+    <div class="modal-title"    id="modal-title">Acceso encargados</div>
     <div class="modal-subtitle" id="modal-subtitle">Ingresá la contraseña para continuar</div>
     <input class="modal-input" id="modal-pwd" type="password" placeholder="••••••"
            onkeydown="if(event.key==='Enter') checkPassword()">
@@ -328,21 +333,9 @@
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-
-// ── Constantes ────────────────────────────────────────────────────────────────
-const ROOMS = [
-  { id:'guarderia1', name:'Bebés',          ageMin:0,  ageMax:3,  capacity:10, emoji:'🍼', color:'#FCE7F3' },
-  { id:'guarderia2', name:'Pequeños',        ageMin:4,  ageMax:5,  capacity:30, emoji:'🧸', color:'#FEF9C3' },
-  { id:'guarderia3', name:'Niños',           ageMin:6,  ageMax:7,  capacity:30, emoji:'⚽', color:'#DBEAFE' },
-  { id:'guarderia4', name:'Preadolescentes', ageMin:8,  ageMax:11, capacity:40, emoji:'🎮', color:'#F0FDF4' },
-];
-const STAFF_PASSWORD = 'victory2024';
-
-// ── Firebase ──────────────────────────────────────────────────────────────────
-const firebaseConfig = {
+// ── Firebase init ─────────────────────────────────────────────────────────────
+var firebaseConfig = {
   apiKey:            'AIzaSyC1a0rVTJoMgRilS6Uzpczw_xzL-8FTUX4',
   authDomain:        'victory-kids.firebaseapp.com',
   databaseURL:       'https://victory-kids-default-rtdb.firebaseio.com',
@@ -352,37 +345,46 @@ const firebaseConfig = {
   appId:             '1:864595504668:web:eb54266cb51cb17a8b39d9'
 };
 firebase.initializeApp(firebaseConfig);
-const db        = firebase.database();
-const stateRef  = db.ref('vk_state');
-const configRef = db.ref('vk_config');
+var db        = firebase.database();
+var stateRef  = db.ref('vk_state');
+var configRef = db.ref('vk_config');
+
+// ── Constantes ────────────────────────────────────────────────────────────────
+var ROOMS = [
+  { id:'guarderia1', name:'Bebés',          ageMin:0,  ageMax:3,  capacity:10, emoji:'🍼', color:'#FCE7F3' },
+  { id:'guarderia2', name:'Pequeños',        ageMin:4,  ageMax:5,  capacity:30, emoji:'🧸', color:'#FEF9C3' },
+  { id:'guarderia3', name:'Niños',           ageMin:6,  ageMax:7,  capacity:30, emoji:'⚽', color:'#DBEAFE' },
+  { id:'guarderia4', name:'Preadolescentes', ageMin:8,  ageMax:11, capacity:40, emoji:'🎮', color:'#F0FDF4' }
+];
+var STAFF_PASSWORD = 'victory2024';
 
 // ── Estado ────────────────────────────────────────────────────────────────────
-let state = {
+var state = {
   registrations: [],
   sessionDate: new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})
 };
-let appConfig     = { enabledFrom: null };
-let selectedRoom  = null;
-let staffUnlocked = false;
-let pendingView   = null;
-let pendingAction = null;
-let currentFilter = 'all';
+var appConfig     = { enabledFrom: null };
+var selectedRoom  = null;
+var staffUnlocked = false;
+var pendingView   = null;
+var pendingAction = null;
+var currentFilter = 'all';
 
 // ── Firebase listeners ────────────────────────────────────────────────────────
-stateRef.on('value', snap => {
-  const d = snap.val();
+stateRef.on('value', function(snap) {
+  var d = snap.val();
   if (d) {
     state.registrations = d.registrations || [];
     state.sessionDate   = d.sessionDate   || state.sessionDate;
   } else {
     state.registrations = [];
   }
-  if (document.getElementById('view-panel')?.classList.contains('active'))    renderPanel();
-  if (document.getElementById('view-checkout')?.classList.contains('active')) renderPending();
+  if (document.getElementById('view-panel').classList.contains('active'))    renderPanel();
+  if (document.getElementById('view-checkout').classList.contains('active')) renderPending();
   renderRooms();
 });
 
-configRef.on('value', snap => {
+configRef.on('value', function(snap) {
   appConfig = snap.val() || { enabledFrom: null };
   checkLockscreen();
   updateConfigUI();
@@ -393,36 +395,36 @@ function saveState() {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function getRoomCount(id)  { return state.registrations.filter(r => r.room === id && !r.checkedOut).length; }
-function getRoomByAge(age) { return ROOMS.find(r => age >= r.ageMin && age <= r.ageMax) || null; }
+function getRoomCount(id)  { return state.registrations.filter(function(r){ return r.room===id && !r.checkedOut; }).length; }
+function getRoomByAge(age) { return ROOMS.filter(function(r){ return age>=r.ageMin && age<=r.ageMax; })[0] || null; }
 
 function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let c = '';
-  for (let i = 0; i < 4; i++) c += chars[Math.floor(Math.random() * chars.length)];
-  return state.registrations.some(r => r.code === c) ? generateCode() : c;
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var c = '';
+  for (var i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  return state.registrations.some(function(r){ return r.code===c; }) ? generateCode() : c;
 }
 
-function safeBtnId(phone) {
-  return 'cp' + phone.replace(/[^0-9]/g, '');
-}
+function safeBtnId(phone) { return 'cp' + phone.replace(/[^0-9]/g,''); }
 
 // ── Vistas ────────────────────────────────────────────────────────────────────
 function showView(v) {
-  document.querySelectorAll('.view,.panel-view').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('view-' + v)?.classList.add('active');
+  document.querySelectorAll('.view,.panel-view').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(el){ el.classList.remove('active'); });
+  var el = document.getElementById('view-'+v);
+  if (el) el.classList.add('active');
   var map = { register:'btn-register', panel:'btn-panel', checkout:'btn-checkout', config:'btn-config' };
-  document.getElementById(map[v])?.classList.add('active');
-  if (v === 'panel')    renderPanel();
-  if (v === 'checkout') renderPending();
+  var btn = document.getElementById(map[v]);
+  if (btn) btn.classList.add('active');
+  if (v==='panel')    renderPanel();
+  if (v==='checkout') renderPending();
   checkLockscreen();
 }
 
 function showStep(s) {
-  document.getElementById('step-rooms').style.display  = s === 'rooms'  ? '' : 'none';
-  document.getElementById('step-form').style.display   = s === 'form'   ? '' : 'none';
-  document.getElementById('step-ticket').style.display = s === 'ticket' ? '' : 'none';
+  document.getElementById('step-rooms').style.display  = s==='rooms'  ? '' : 'none';
+  document.getElementById('step-form').style.display   = s==='form'   ? '' : 'none';
+  document.getElementById('step-ticket').style.display = s==='ticket' ? '' : 'none';
 }
 
 // ── Salas ─────────────────────────────────────────────────────────────────────
@@ -433,21 +435,22 @@ function renderRooms() {
     var count = getRoomCount(room.id);
     var full  = count >= room.capacity;
     var click = full ? '' : 'selectRoom("' + room.id + '")';
-    return '<div class="room-chip ' + (full ? 'full' : 'available') + '" onclick="' + click + '" id="chip-' + room.id + '">'
+    return '<div class="room-chip ' + (full?'full':'available') + '" onclick="' + click + '" id="chip-' + room.id + '">'
       + '<div style="font-size:1.8rem">' + room.emoji + '</div>'
       + '<div class="room-chip-name">' + room.name + '</div>'
-      + '<div class="room-chip-age">' + room.ageMin + '–' + room.ageMax + ' años</div>'
-      + '<div class="room-chip-cupo">' + (full ? '🔴 Sin cupo' : '✅ ' + (room.capacity - count) + ' cupos') + '</div>'
+      + '<div class="room-chip-age">'  + room.ageMin + '–' + room.ageMax + ' años</div>'
+      + '<div class="room-chip-cupo">' + (full ? '🔴 Sin cupo' : '✅ '+(room.capacity-count)+' cupos') + '</div>'
       + '</div>';
   }).join('');
 }
 
 function selectRoom(roomId) {
-  selectedRoom = ROOMS.find(function(r) { return r.id === roomId; });
-  document.querySelectorAll('.room-chip').forEach(function(c) { c.classList.remove('selected'); });
-  document.getElementById('chip-' + roomId)?.classList.add('selected');
+  selectedRoom = ROOMS.filter(function(r){ return r.id===roomId; })[0];
+  document.querySelectorAll('.room-chip').forEach(function(c){ c.classList.remove('selected'); });
+  var chip = document.getElementById('chip-'+roomId);
+  if (chip) chip.classList.add('selected');
   document.getElementById('f-room-display').value = selectedRoom.name;
-  setTimeout(function() { showStep('form'); }, 300);
+  setTimeout(function(){ showStep('form'); }, 300);
 }
 
 // ── Registro ──────────────────────────────────────────────────────────────────
@@ -459,19 +462,15 @@ function submitRegistration() {
   var alertEl    = document.getElementById('form-alert');
 
   if (!childName || !parentName || isNaN(age) || !phone) {
-    alertEl.innerHTML = '<div class="alert alert-danger">⚠️ Por favor completá todos los campos obligatorios.</div>';
-    return;
+    alertEl.innerHTML = '<div class="alert alert-danger">⚠️ Por favor completá todos los campos obligatorios.</div>'; return;
   }
   var correctRoom = getRoomByAge(age);
   if (!correctRoom || correctRoom.id !== selectedRoom.id) {
-    alertEl.innerHTML = '<div class="alert alert-warning">⚠️ La edad (' + age + ' años) no coincide con la sala. Sala correcta: ' + (correctRoom ? correctRoom.name : 'fuera de rango') + '.</div>';
-    return;
+    alertEl.innerHTML = '<div class="alert alert-warning">⚠️ La edad (' + age + ' años) no coincide con la sala. Sala correcta: ' + (correctRoom ? correctRoom.name : 'fuera de rango') + '.</div>'; return;
   }
   if (getRoomCount(selectedRoom.id) >= selectedRoom.capacity) {
-    alertEl.innerHTML = '<div class="alert alert-danger">🔴 La sala <strong>' + selectedRoom.name + '</strong> no tiene cupo.</div>';
-    return;
+    alertEl.innerHTML = '<div class="alert alert-danger">🔴 La sala <strong>' + selectedRoom.name + '</strong> no tiene cupo.</div>'; return;
   }
-
   var reg = {
     id: Date.now(), code: generateCode(),
     childName: childName, age: age, parentName: parentName, phone: phone,
@@ -496,9 +495,7 @@ function renderTicket(reg) {
 }
 
 function newRegistration() {
-  ['f-childname','f-age','f-parentname','f-phone'].forEach(function(id) {
-    document.getElementById(id).value = '';
-  });
+  ['f-childname','f-age','f-parentname','f-phone'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('form-alert').innerHTML = '';
   selectedRoom = null;
   renderRooms();
@@ -511,25 +508,24 @@ function renderPanel() {
   var total  = state.registrations.length;
   var active = state.registrations.filter(function(r){ return !r.checkedOut; }).length;
   var out    = state.registrations.filter(function(r){ return  r.checkedOut; }).length;
-  var ru     = (function(){ var s={}; state.registrations.forEach(function(r){ s[r.room]=1; }); return Object.keys(s).length; })();
+  var ruSet  = {}; state.registrations.forEach(function(r){ ruSet[r.room]=1; });
+  var ru     = Object.keys(ruSet).length;
 
   document.getElementById('stats-row').innerHTML =
-    '<div class="stat-card"><div class="stat-num">' + total  + '</div><div class="stat-label">Total</div></div>'
-  + '<div class="stat-card"><div class="stat-num" style="color:var(--success)">' + active + '</div><div class="stat-label">En sala</div></div>'
-  + '<div class="stat-card"><div class="stat-num" style="color:var(--muted)">'   + out    + '</div><div class="stat-label">Retirados</div></div>'
-  + '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">'  + ru     + '</div><div class="stat-label">Salas</div></div>';
+      '<div class="stat-card"><div class="stat-num">'                           + total  + '</div><div class="stat-label">Total</div></div>'
+    + '<div class="stat-card"><div class="stat-num" style="color:var(--success)">' + active + '</div><div class="stat-label">En sala</div></div>'
+    + '<div class="stat-card"><div class="stat-num" style="color:var(--muted)">'   + out    + '</div><div class="stat-label">Retirados</div></div>'
+    + '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">'  + ru     + '</div><div class="stat-label">Salas</div></div>';
 
   var roomIds = [];
   state.registrations.forEach(function(r){ if (roomIds.indexOf(r.room)<0) roomIds.push(r.room); });
   var roomBtns = roomIds.map(function(rid) {
-    var room = ROOMS.find(function(r){ return r.id===rid; });
-    var active_class = currentFilter===rid ? 'active' : '';
-    return '<button class="filter-pill ' + active_class + '" onclick="filterRoom(\'' + rid + '\',this)">'
+    var room = ROOMS.filter(function(r){ return r.id===rid; })[0];
+    return '<button class="filter-pill ' + (currentFilter===rid?'active':'') + '" onclick="filterRoom(\'' + rid + '\',this)">'
       + room.emoji + ' ' + room.name + ' (' + getRoomCount(rid) + ')</button>';
   }).join('');
   document.getElementById('room-filter').innerHTML =
-    '<button class="filter-pill ' + (currentFilter==='all'?'active':'') + '" onclick="filterRoom(\'all\',this)">Todas</button>'
-    + roomBtns;
+    '<button class="filter-pill ' + (currentFilter==='all'?'active':'') + '" onclick="filterRoom(\'all\',this)">Todas</button>' + roomBtns;
 
   renderKidsList();
 }
@@ -545,262 +541,217 @@ function renderKidsList() {
   var list = document.getElementById('kids-list');
   var regs = state.registrations;
   if (currentFilter !== 'all') regs = regs.filter(function(r){ return r.room===currentFilter; });
-  if (!regs.length) {
-    list.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div><p>Sin registros en esta sala</p></div>';
-    return;
-  }
+  if (!regs.length) { list.innerHTML='<div class="empty"><div class="empty-icon">🌟</div><p>Sin registros en esta sala</p></div>'; return; }
   list.innerHTML = regs.map(function(reg) {
-    var room = ROOMS.find(function(r){ return r.id===reg.room; });
-    var bid  = safeBtnId(reg.phone || '');
+    var room = ROOMS.filter(function(r){ return r.id===reg.room; })[0];
+    var bid  = safeBtnId(reg.phone||'');
     var phoneHtml = reg.phone
       ? '<div class="phone-actions">'
         + '<span style="font-size:0.78rem;color:var(--primary-dark);font-weight:700;">📞 ' + reg.phone + '</span>'
         + '<button class="btn-phone btn-copy" id="' + bid + '" onclick="copyPhone(\'' + reg.phone + '\',\'' + bid + '\')">📋 Copiar</button>'
-        + '<button class="btn-phone btn-wa" onclick="openWhatsApp(\'' + reg.phone + '\')">💬 WhatsApp</button>'
+        + '<button class="btn-phone btn-wa"   onclick="openWhatsApp(\'' + reg.phone + '\')">💬 WhatsApp</button>'
         + '</div>'
       : '';
-    var retiroBtn = !reg.checkedOut
-      ? '<button class="btn-success-sm" onclick="checkoutById(' + reg.id + ')">Retirar</button>'
-      : '';
+    var retiroBtn = !reg.checkedOut ? '<button class="btn-success-sm" onclick="checkoutById(' + reg.id + ')">Retirar</button>' : '';
     return '<div class="kid-row ' + (reg.checkedOut?'checked-out':'') + '" id="row-' + reg.id + '">'
-      + '<div class="kid-avatar" style="background:' + (room ? room.color : '#F5F5F4') + '">' + reg.emoji + '</div>'
+      + '<div class="kid-avatar" style="background:' + (room?room.color:'#F5F5F4') + '">' + reg.emoji + '</div>'
       + '<div class="kid-info">'
-        + '<div class="kid-name">' + reg.childName + '</div>'
+        + '<div class="kid-name">'   + reg.childName + '</div>'
         + '<div class="kid-detail">' + reg.age + ' años · ' + reg.parentName + ' · ' + reg.time + '</div>'
         + phoneHtml
-        + '<div style="margin-top:4px">'
-          + '<span class="badge-room">' + reg.roomName + '</span>'
-          + '<span class="badge ' + (reg.checkedOut?'badge-out':'badge-active') + '" style="margin-left:4px">'
-            + (reg.checkedOut ? 'Retirado' : '✅ En sala') + '</span>'
-        + '</div>'
+        + '<div style="margin-top:4px"><span class="badge-room">' + reg.roomName + '</span>'
+        + '<span class="badge ' + (reg.checkedOut?'badge-out':'badge-active') + '" style="margin-left:4px">' + (reg.checkedOut?'Retirado':'✅ En sala') + '</span></div>'
       + '</div>'
       + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
-        + '<div class="kid-code">' + reg.code + '</div>'
-        + retiroBtn
-      + '</div>'
-      + '</div>';
+        + '<div class="kid-code">' + reg.code + '</div>' + retiroBtn
+      + '</div></div>';
   }).join('');
 }
 
 function checkoutById(id) {
-  var reg = state.registrations.find(function(r){ return r.id===id; });
-  if (reg) { reg.checkedOut = true; saveState(); }
+  var reg = state.registrations.filter(function(r){ return r.id===id; })[0];
+  if (reg) { reg.checkedOut=true; saveState(); }
   renderPanel();
 }
 
 // ── Teléfono ──────────────────────────────────────────────────────────────────
 function copyPhone(phone, btnId) {
-  function doFeedback(id) {
-    var btn = document.getElementById(id);
+  function feedback() {
+    var btn = document.getElementById(btnId);
     if (!btn) return;
-    btn.textContent = '✅ Copiado';
-    btn.classList.add('copied');
+    btn.textContent='✅ Copiado'; btn.classList.add('copied');
     setTimeout(function(){ btn.textContent='📋 Copiar'; btn.classList.remove('copied'); }, 2000);
   }
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(phone)
-      .then(function(){ doFeedback(btnId); })
-      .catch(function(){
-        var ta = document.createElement('textarea');
-        ta.value = phone;
-        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-        document.body.removeChild(ta); doFeedback(btnId);
-      });
+    navigator.clipboard.writeText(phone).then(feedback).catch(function(){
+      var ta=document.createElement('textarea'); ta.value=phone;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); feedback();
+    });
   } else {
-    var ta = document.createElement('textarea');
-    ta.value = phone;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta); doFeedback(btnId);
+    var ta=document.createElement('textarea'); ta.value=phone;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); feedback();
   }
 }
 
 function openWhatsApp(phone) {
-  var clean = phone.replace(/[\s\-\+\(\)]/g,'');
-  window.open('https://wa.me/' + clean, '_blank');
+  window.open('https://wa.me/' + phone.replace(/[\s\-\+\(\)]/g,''), '_blank');
 }
 
 // ── Retiro ────────────────────────────────────────────────────────────────────
 function doCheckout() {
   var code = document.getElementById('checkout-code').value.trim().toUpperCase();
   var res  = document.getElementById('checkout-result');
-  if (!code || code.length < 4) {
-    res.innerHTML = '<div class="alert alert-warning">⚠️ Ingresá el código de 4 caracteres.</div>'; return;
-  }
-  var reg = state.registrations.find(function(r){ return r.code===code; });
+  if (!code||code.length<4) { res.innerHTML='<div class="alert alert-warning">⚠️ Ingresá el código de 4 caracteres.</div>'; return; }
+  var reg = state.registrations.filter(function(r){ return r.code===code; })[0];
   if (!reg)           { res.innerHTML='<div class="alert alert-danger">❌ Código no encontrado.</div>'; return; }
-  if (reg.checkedOut) { res.innerHTML='<div class="alert alert-info">ℹ️ <strong>' + reg.childName + '</strong> ya fue retirado.</div>'; return; }
-  reg.checkedOut = true; saveState();
-  res.innerHTML = '<div class="alert alert-success pop">✅ <strong>' + reg.childName + '</strong> entregado a ' + reg.parentName + ' correctamente.</div>';
-  document.getElementById('checkout-code').value = '';
+  if (reg.checkedOut) { res.innerHTML='<div class="alert alert-info">ℹ️ <strong>'+reg.childName+'</strong> ya fue retirado.</div>'; return; }
+  reg.checkedOut=true; saveState();
+  res.innerHTML='<div class="alert alert-success pop">✅ <strong>'+reg.childName+'</strong> entregado a '+reg.parentName+' correctamente.</div>';
+  document.getElementById('checkout-code').value='';
   renderPending();
 }
 
 function renderPending() {
   var list    = document.getElementById('pending-list');
   var pending = state.registrations.filter(function(r){ return !r.checkedOut; });
-  if (!pending.length) {
-    list.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>Todos los niños fueron retirados</p></div>';
-    return;
-  }
-  list.innerHTML = pending.map(function(reg) {
+  if (!pending.length) { list.innerHTML='<div class="empty"><div class="empty-icon">🎉</div><p>Todos los niños fueron retirados</p></div>'; return; }
+  list.innerHTML = pending.map(function(reg){
     return '<div class="kid-row">'
       + '<div class="kid-avatar" style="font-size:1.4rem">👦</div>'
-      + '<div class="kid-info">'
-        + '<div class="kid-name">' + reg.childName + '</div>'
-        + '<div class="kid-detail">' + reg.roomName + ' · ' + reg.parentName + '</div>'
-        + (reg.phone ? '<div style="font-size:0.78rem;color:var(--primary-dark);font-weight:700;margin-top:2px;">📞 ' + reg.phone + '</div>' : '')
+      + '<div class="kid-info"><div class="kid-name">'+reg.childName+'</div>'
+      + '<div class="kid-detail">'+reg.roomName+' · '+reg.parentName+'</div>'
+      + (reg.phone?'<div style="font-size:0.78rem;color:var(--primary-dark);font-weight:700;margin-top:2px;">📞 '+reg.phone+'</div>':'')
       + '</div>'
       + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
-        + '<div class="kid-code">' + reg.code + '</div>'
-        + '<button class="btn-success-sm" onclick="checkoutFromPending(' + reg.id + ')">Retirar</button>'
-      + '</div>'
-      + '</div>';
+      + '<div class="kid-code">'+reg.code+'</div>'
+      + '<button class="btn-success-sm" onclick="checkoutFromPending('+reg.id+')">Retirar</button>'
+      + '</div></div>';
   }).join('');
 }
 
 function checkoutFromPending(id) {
-  var reg = state.registrations.find(function(r){ return r.id===id; });
-  if (reg) { reg.checkedOut = true; saveState(); }
+  var reg = state.registrations.filter(function(r){ return r.id===id; })[0];
+  if (reg) { reg.checkedOut=true; saveState(); }
   renderPending();
   document.getElementById('checkout-result').innerHTML =
-    '<div class="alert alert-success pop">✅ <strong>' + (reg ? reg.childName : '') + '</strong> retirado correctamente.</div>';
+    '<div class="alert alert-success pop">✅ <strong>'+(reg?reg.childName:'')+'</strong> retirado correctamente.</div>';
 }
 
 // ── Sesión ────────────────────────────────────────────────────────────────────
 function clearSession() {
-  pendingAction = 'clearSession';
-  document.getElementById('modal-pwd').value       = '';
-  document.getElementById('modal-error').textContent = '';
-  document.getElementById('modal-icon').textContent  = '⚠️';
-  document.getElementById('modal-title').textContent = 'Confirmar nueva sesión';
-  document.getElementById('modal-subtitle').textContent = 'Ingresá la contraseña para borrar los registros actuales.';
+  pendingAction='clearSession';
+  document.getElementById('modal-pwd').value='';
+  document.getElementById('modal-error').textContent='';
+  document.getElementById('modal-icon').textContent='⚠️';
+  document.getElementById('modal-title').textContent='Confirmar nueva sesión';
+  document.getElementById('modal-subtitle').textContent='Ingresá la contraseña para borrar los registros actuales.';
   document.getElementById('password-modal').classList.add('open');
-  setTimeout(function(){ document.getElementById('modal-pwd').focus(); }, 100);
+  setTimeout(function(){ document.getElementById('modal-pwd').focus(); },100);
 }
 
 function executeClearSession() {
-  state.registrations = [];
-  state.sessionDate   = new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
-  saveState();
-  renderPanel();
+  state.registrations=[];
+  state.sessionDate=new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  saveState(); renderPanel();
 }
 
 // ── Configuración ─────────────────────────────────────────────────────────────
 function saveConfig() {
   var d = document.getElementById('cfg-date').value;
   var t = document.getElementById('cfg-time').value;
-  if (!d || !t) {
-    document.getElementById('cfg-status').innerHTML = '<div class="alert alert-warning">⚠️ Completá fecha y hora.</div>';
-    return;
-  }
+  if (!d||!t) { document.getElementById('cfg-status').innerHTML='<div class="alert alert-warning">⚠️ Completá fecha y hora.</div>'; return; }
 
-  // ✅ FIX TIMEZONE: construir con hora LOCAL, no UTC
-  var parts = d.split('-').map(Number);   // [yyyy, mm, dd]
-  var times  = t.split(':').map(Number);  // [hh, mm]
-  var dt = new Date(parts[0], parts[1]-1, parts[2], times[0], times[1], 0);
+  // ✅ FIX TIMEZONE: new Date(y,m,d,h,min) siempre usa hora LOCAL
+  var p = d.split('-').map(Number);
+  var q = t.split(':').map(Number);
+  var dt = new Date(p[0], p[1]-1, p[2], q[0], q[1], 0);
 
   appConfig.enabledFrom = dt.toISOString();
   configRef.set(appConfig);
-
   document.getElementById('cfg-status').innerHTML =
-    '<div class="alert alert-success">✅ Guardado. Habilitación: <strong>'
-    + dt.toLocaleString('es-AR') + '</strong></div>';
+    '<div class="alert alert-success">✅ Guardado. Habilitación: <strong>'+dt.toLocaleString('es-AR')+'</strong></div>';
 }
 
 function clearConfig() {
-  appConfig.enabledFrom = null;
+  appConfig.enabledFrom=null;
   configRef.set(appConfig);
-  document.getElementById('cfg-status').innerHTML =
-    '<div class="alert alert-info">ℹ️ Restricción eliminada. El registro está habilitado.</div>';
-  document.getElementById('cfg-date').value = '';
-  document.getElementById('cfg-time').value = '';
-  document.getElementById('cfg-current').innerHTML = '';
+  document.getElementById('cfg-status').innerHTML='<div class="alert alert-info">ℹ️ Restricción eliminada. El registro está habilitado.</div>';
+  document.getElementById('cfg-date').value='';
+  document.getElementById('cfg-time').value='';
+  document.getElementById('cfg-current').innerHTML='';
 }
 
 function updateConfigUI() {
   var cur = document.getElementById('cfg-current');
   if (!cur) return;
   if (!appConfig.enabledFrom) {
-    cur.innerHTML = '<div class="alert alert-success">✅ Registro habilitado (sin restricción)</div>';
-    return;
+    cur.innerHTML='<div class="alert alert-success">✅ Registro habilitado (sin restricción)</div>'; return;
   }
-  var dt  = new Date(appConfig.enabledFrom);
-  var now = new Date();
-  cur.innerHTML = now >= dt
-    ? '<div class="alert alert-success">✅ Registro habilitado desde ' + dt.toLocaleString('es-AR') + '</div>'
-    : '<div class="alert alert-warning">⏳ Bloqueado hasta el '       + dt.toLocaleString('es-AR') + '</div>';
+  var dt=new Date(appConfig.enabledFrom), now=new Date();
+  cur.innerHTML = now>=dt
+    ? '<div class="alert alert-success">✅ Registro habilitado desde '+dt.toLocaleString('es-AR')+'</div>'
+    : '<div class="alert alert-warning">⏳ Bloqueado hasta el '+dt.toLocaleString('es-AR')+'</div>';
 
-  // Pre-llenar inputs solo si están vacíos
-  var cfgDate = document.getElementById('cfg-date');
-  var cfgTime = document.getElementById('cfg-time');
+  var cfgDate=document.getElementById('cfg-date');
+  var cfgTime=document.getElementById('cfg-time');
   if (cfgDate && !cfgDate.value) {
-    // Convertir la fecha UTC guardada de vuelta a local para mostrar en el input
-    var localISO = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString();
-    cfgDate.value = localISO.slice(0,10);
-    cfgTime.value = localISO.slice(11,16);
+    // Mostrar en hora local: restar offset para cancelar la conversión UTC→local del input
+    var local = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString();
+    cfgDate.value = local.slice(0,10);
+    cfgTime.value = local.slice(11,16);
   }
 }
 
 // ── Lockscreen ────────────────────────────────────────────────────────────────
 function checkLockscreen() {
   var lock = document.getElementById('lockscreen');
-  var registerActive = document.getElementById('view-register')?.classList.contains('active');
-
-  if (!appConfig.enabledFrom || !registerActive) {
-    lock.style.display = 'none'; return;
-  }
+  var registerActive = document.getElementById('view-register').classList.contains('active');
+  if (!appConfig.enabledFrom || !registerActive) { lock.style.display='none'; return; }
   var enabledAt = new Date(appConfig.enabledFrom);
-  if (new Date() >= enabledAt) {
-    lock.style.display = 'none'; return;
-  }
-  lock.style.display = 'flex';
+  if (new Date() >= enabledAt) { lock.style.display='none'; return; }
+  lock.style.display='flex';
   document.getElementById('lockscreen-date').textContent =
     'Se habilitará el ' + enabledAt.toLocaleString('es-AR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 }
 
-// Cuenta regresiva cada segundo
+// Cuenta regresiva — cada segundo
 setInterval(function() {
   if (!appConfig.enabledFrom) return;
   var enabledAt = new Date(appConfig.enabledFrom);
   var diff = enabledAt - new Date();
   if (diff <= 0) {
-    // ✅ Tiempo cumplido: limpiar config y habilitar registro
+    // ✅ Tiempo cumplido: habilitar registro sin recargar
     appConfig.enabledFrom = null;
-    document.getElementById('lockscreen').style.display = 'none';
-    document.getElementById('countdown-display').textContent = '--:--:--';
+    document.getElementById('lockscreen').style.display='none';
+    document.getElementById('countdown-display').textContent='--:--:--';
     return;
   }
-  var h = Math.floor(diff / 3600000);
-  var m = Math.floor((diff % 3600000) / 60000);
-  var s = Math.floor((diff % 60000) / 1000);
-  var el = document.getElementById('countdown-display');
-  if (el) el.textContent =
-    String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  var h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
+  var el=document.getElementById('countdown-display');
+  if (el) el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 }, 1000);
 
 // ── Acceso staff ──────────────────────────────────────────────────────────────
 function requestAccess(view) {
-  if (view === 'register') { showView(view); return; }
-  if (staffUnlocked)       { showView(view); return; }
-  pendingView   = view;
-  pendingAction = null;
-  document.getElementById('modal-pwd').value         = '';
-  document.getElementById('modal-error').textContent = '';
-  document.getElementById('modal-icon').textContent  = '🔐';
-  document.getElementById('modal-title').textContent = 'Acceso encargados';
-  document.getElementById('modal-subtitle').textContent = 'Ingresá la contraseña para continuar';
+  if (view==='register') { showView(view); return; }
+  if (staffUnlocked)     { showView(view); return; }
+  pendingView=view; pendingAction=null;
+  document.getElementById('modal-pwd').value='';
+  document.getElementById('modal-error').textContent='';
+  document.getElementById('modal-icon').textContent='🔐';
+  document.getElementById('modal-title').textContent='Acceso encargados';
+  document.getElementById('modal-subtitle').textContent='Ingresá la contraseña para continuar';
   document.getElementById('password-modal').classList.add('open');
-  setTimeout(function(){ document.getElementById('modal-pwd').focus(); }, 100);
+  setTimeout(function(){ document.getElementById('modal-pwd').focus(); },100);
 }
 
 function checkPassword() {
-  var pwd = document.getElementById('modal-pwd').value;
-  if (pwd === STAFF_PASSWORD) {
-    staffUnlocked = true;
-    var action = pendingAction;  // guardar ANTES de closeModal
-    var view   = pendingView;
+  var pwd=document.getElementById('modal-pwd').value;
+  if (pwd===STAFF_PASSWORD) {
+    staffUnlocked=true;
+    var action=pendingAction, view=pendingView;  // guardar ANTES de closeModal
     closeModal();
-    if (action === 'clearSession') {
+    if (action==='clearSession') {
       executeClearSession();
     } else if (view) {
       showView(view);
@@ -809,25 +760,23 @@ function checkPassword() {
       document.getElementById('btn-config').textContent   = '⚙️ Config';
     }
   } else {
-    document.getElementById('modal-error').textContent = '❌ Contraseña incorrecta';
-    document.getElementById('modal-pwd').value = '';
+    document.getElementById('modal-error').textContent='❌ Contraseña incorrecta';
+    document.getElementById('modal-pwd').value='';
     document.getElementById('modal-pwd').focus();
   }
 }
 
 function closeModal() {
   document.getElementById('password-modal').classList.remove('open');
-  pendingView   = null;
-  pendingAction = null;
-  document.getElementById('modal-icon').textContent     = '🔐';
-  document.getElementById('modal-title').textContent    = 'Acceso encargados';
-  document.getElementById('modal-subtitle').textContent = 'Ingresá la contraseña para continuar';
+  pendingView=null; pendingAction=null;
+  document.getElementById('modal-icon').textContent='🔐';
+  document.getElementById('modal-title').textContent='Acceso encargados';
+  document.getElementById('modal-subtitle').textContent='Ingresá la contraseña para continuar';
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderRooms();
 showStep('rooms');
-
 </script>
 </body>
 </html>
