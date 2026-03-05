@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Victory Kids — Check-in</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
   :root {
     --primary: #F97316;
@@ -330,7 +328,8 @@
   </div>
 </div>
 
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 
 // ── Constantes ────────────────────────────────────────────────────────────────
@@ -764,7 +763,13 @@ setInterval(function() {
   if (!appConfig.enabledFrom) return;
   var enabledAt = new Date(appConfig.enabledFrom);
   var diff = enabledAt - new Date();
-  if (diff <= 0) { document.getElementById('lockscreen').style.display = 'none'; return; }
+  if (diff <= 0) {
+    // ✅ Tiempo cumplido: limpiar config y habilitar registro
+    appConfig.enabledFrom = null;
+    document.getElementById('lockscreen').style.display = 'none';
+    document.getElementById('countdown-display').textContent = '--:--:--';
+    return;
+  }
   var h = Math.floor(diff / 3600000);
   var m = Math.floor((diff % 3600000) / 60000);
   var s = Math.floor((diff % 60000) / 1000);
