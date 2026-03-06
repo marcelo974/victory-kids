@@ -164,7 +164,6 @@
   .modal-btn:hover { background: var(--primary-dark); }
   .modal-cancel { display: block; margin-top: 10px; color: var(--muted); font-size: 0.8rem; font-weight: 700; cursor: pointer; background: none; border: none; width: 100%; }
 
-  #lockscreen { display: none; position: fixed; inset: 0; background: linear-gradient(135deg,#F97316,#C2410C); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; padding: 32px; }
 </style>
 </head>
 <body>
@@ -287,23 +286,10 @@
     <p>Administración del sistema</p>
   </div>
   <div class="card">
-    <div class="section-title">🚦 Control de registros</div>
-    <p style="font-size:0.85rem;color:var(--muted);font-weight:600;margin-bottom:20px;">
-      Habilitá o bloqueá el registro de niños manualmente. El cambio se aplica en todos los dispositivos de inmediato.
-    </p>
-    <div id="cfg-current" style="margin-bottom:20px;"></div>
-    <button class="btn btn-primary" id="btn-enable-reg"  onclick="setRegistration(true)"  style="margin-bottom:10px;">✅ Habilitar registro</button>
-    <button class="btn btn-danger"  id="btn-disable-reg" onclick="setRegistration(false)">🔒 Bloquear registro</button>
-    <div id="cfg-status" style="margin-top:14px;"></div>
+    <div class="section-title">🗓️ Sesión actual</div>
+    <div id="cfg-current"></div>
+    <button class="btn btn-danger" onclick="clearSession()" style="margin-top:16px;">🗑️ Nueva sesión</button>
   </div>
-</div>
-
-<!-- LOCKSCREEN -->
-<div id="lockscreen">
-  <div style="font-size:4rem;margin-bottom:16px;">🔒</div>
-  <div style="font-family:'Fredoka One',cursive;font-size:2rem;margin-bottom:8px;">Registro no disponible</div>
-  <div style="font-size:0.95rem;opacity:0.85;font-weight:600;margin-bottom:32px;">El equipo habilitará el registro en breve</div>
-  <button onclick="lockscreenStaffAccess()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;padding:10px 22px;border-radius:30px;cursor:pointer;">🔐 Acceso staff</button>
 </div>
 
 <!-- MODAL CONTRASEÑA -->
@@ -334,7 +320,6 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db        = firebase.database();
 var stateRef  = db.ref('vk_state');
-var configRef = db.ref('vk_config');
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 var ROOMS = [
@@ -350,7 +335,6 @@ var state = {
   registrations: [],
   sessionDate: new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})
 };
-var appConfig     = { registrationEnabled: true };
 var selectedRoom  = null;
 var staffUnlocked = false;
 var pendingView   = null;
@@ -369,17 +353,6 @@ stateRef.on('value', function(snap) {
   if (document.getElementById('view-panel').classList.contains('active'))    renderPanel();
   if (document.getElementById('view-checkout').classList.contains('active')) renderPending();
   renderRooms();
-});
-
-configRef.on('value', function(snap) {
-  var data = snap.val();
-  appConfig = data || { registrationEnabled: true };
-  // Migración: si existía enabledFrom del sistema viejo, ignorarlo
-  if (!data || data.registrationEnabled === undefined) {
-    appConfig.registrationEnabled = true;
-  }
-  checkLockscreen();
-  updateConfigUI();
 });
 
 function saveState() {
@@ -410,7 +383,6 @@ function showView(v) {
   if (btn) btn.classList.add('active');
   if (v==='panel')    renderPanel();
   if (v==='checkout') renderPending();
-  checkLockscreen();
 }
 
 function showStep(s) {
@@ -647,48 +619,6 @@ function executeClearSession() {
   saveState(); renderPanel();
 }
 
-// ── Configuración ─────────────────────────────────────────────────────────────
-function setRegistration(enabled) {
-  appConfig = { registrationEnabled: enabled };
-  configRef.set(appConfig);
-  // Actualizar UI inmediatamente sin esperar a Firebase
-  updateConfigUI();
-  checkLockscreen();
-  var msg = enabled
-    ? '<div class="alert alert-success">✅ Registro habilitado. Los padres ya pueden registrar niños.</div>'
-    : '<div class="alert alert-danger">🔒 Registro bloqueado. Los padres no pueden registrar niños.</div>';
-  document.getElementById('cfg-status').innerHTML = msg;
-}
-
-function updateConfigUI() {
-  var cur = document.getElementById('cfg-current');
-  if (!cur) return;
-  var enabled = appConfig.registrationEnabled !== false; // true por defecto si no está seteado
-  cur.innerHTML = enabled
-    ? '<div class="alert alert-success">✅ El registro está <strong>habilitado</strong></div>'
-    : '<div class="alert alert-danger">🔒 El registro está <strong>bloqueado</strong></div>';
-}
-
-// ── Lockscreen ────────────────────────────────────────────────────────────────
-function checkLockscreen() {
-  var lock = document.getElementById('lockscreen');
-  var enabled = appConfig.registrationEnabled !== false;
-  if (enabled || staffUnlocked) { lock.style.display='none'; return; }
-  lock.style.display='flex';
-}
-
-function lockscreenStaffAccess() {
-  if (staffUnlocked) { document.getElementById('lockscreen').style.display='none'; showView('config'); return; }
-  pendingView='config'; pendingAction=null;
-  document.getElementById('modal-pwd').value='';
-  document.getElementById('modal-error').textContent='';
-  document.getElementById('modal-icon').textContent='🔐';
-  document.getElementById('modal-title').textContent='Acceso encargados';
-  document.getElementById('modal-subtitle').textContent='Ingresá la contraseña para continuar';
-  document.getElementById('password-modal').classList.add('open');
-  setTimeout(function(){ document.getElementById('modal-pwd').focus(); },100);
-}
-
 // ── Acceso staff ──────────────────────────────────────────────────────────────
 function requestAccess(view) {
   if (view==='register') { showView(view); return; }
@@ -707,7 +637,6 @@ function checkPassword() {
   var pwd=document.getElementById('modal-pwd').value;
   if (pwd===STAFF_PASSWORD) {
     staffUnlocked=true;
-    document.getElementById('lockscreen').style.display='none';
     var action=pendingAction, view=pendingView;  // guardar ANTES de closeModal
     closeModal();
     if (action==='clearSession') {
