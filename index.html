@@ -7,13 +7,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #F97316; --primary-light: #FED7AA; --primary-dark: #C2410C;
-    --accent: #7C3AED; --accent-light: #EDE9FE;
-    --success: #16A34A; --success-light: #DCFCE7;
-    --danger: #DC2626; --danger-light: #FEE2E2;
-    --warning: #D97706; --warning-light: #FEF3C7;
-    --bg: #FFF7ED; --card: #FFFFFF; --text: #1C1917; --muted: #78716C; --border: #E7E5E4;
-    --radius: 20px; --shadow: 0 4px 24px rgba(249,115,22,0.10); --shadow-lg: 0 8px 40px rgba(249,115,22,0.18);
+    --primary: #F97316;
+    --primary-light: #FED7AA;
+    --primary-dark: #C2410C;
+    --accent: #7C3AED;
+    --accent-light: #EDE9FE;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --danger: #DC2626;
+    --danger-light: #FEE2E2;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --bg: #FFF7ED;
+    --card: #FFFFFF;
+    --text: #1C1917;
+    --muted: #78716C;
+    --border: #E7E5E4;
+    --radius: 20px;
+    --shadow: 0 4px 24px rgba(249,115,22,0.10);
+    --shadow-lg: 0 8px 40px rgba(249,115,22,0.18);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -51,6 +63,7 @@
   .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; transition: all .2s; text-align: center; }
   .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(249,115,22,0.35); }
   .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-primary:disabled { background: #D6D3D1; box-shadow: none; cursor: not-allowed; transform: none; }
   .btn-ghost { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
   .btn-ghost:hover { background: var(--primary-light); }
   .btn-success-sm { background: var(--success); color: white; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; padding: 8px 16px; border-radius: 10px; cursor: pointer; transition: all .2s; }
@@ -74,16 +87,17 @@
   .kid-row { background: var(--card); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow); transition: opacity .3s; }
   .kid-row.checked-out { opacity: 0.45; }
   .kid-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
-  .kid-info { flex: 1; min-width: 0; }
+  .kid-info { flex: 1; }
   .kid-name { font-weight: 800; font-size: 0.95rem; }
   .kid-detail { font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
-  .kid-code { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary); letter-spacing: 2px; flex-shrink: 0; }
+  .kid-phone { font-size: 0.78rem; color: var(--primary-dark); font-weight: 700; margin-top: 3px; }
+  .kid-code { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary); letter-spacing: 2px; margin-right: 8px; }
   .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; }
   .badge-active { background: var(--success-light); color: var(--success); }
   .badge-out { background: var(--border); color: var(--muted); }
   .badge-room { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--accent-light); color: var(--accent); }
-  .checkout-box { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; }
-  .checkout-input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800; letter-spacing: 3px; text-align: center; outline: none; transition: border-color .2s; margin-bottom: 10px; }
+  .checkout-box { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+  .checkout-input { flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800; letter-spacing: 3px; text-align: center; outline: none; transition: border-color .2s; }
   .checkout-input:focus { border-color: var(--primary); }
   .alert { border-radius: 12px; padding: 12px 16px; font-weight: 700; font-size: 0.9rem; margin-top: 12px; display: flex; align-items: center; gap: 8px; }
   .alert-success { background: var(--success-light); color: var(--success); }
@@ -97,11 +111,11 @@
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
   .empty-icon { font-size: 3rem; margin-bottom: 10px; }
   .empty p { font-weight: 600; font-size: 0.9rem; }
-  @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+  @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
   .pop { animation: pop 0.4s ease; }
-  @keyframes slideUp { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .slide-up { animation: slideUp 0.3s ease; }
-  @media (max-width:480px) { .form-row{grid-template-columns:1fr} .stats-row{grid-template-columns:1fr 1fr} .rooms-grid{grid-template-columns:1fr 1fr} }
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } .stats-row { grid-template-columns: 1fr 1fr; } .rooms-grid { grid-template-columns: 1fr 1fr; } }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
   .modal-box { background: white; border-radius: 24px; padding: 36px 28px; width: 90%; max-width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: pop 0.3s ease; }
@@ -114,22 +128,13 @@
   .modal-btn { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: background .2s; }
   .modal-btn:hover { background: var(--primary-dark); }
   .modal-cancel { display: block; margin-top: 10px; color: var(--muted); font-size: 0.8rem; font-weight: 700; cursor: pointer; background: none; border: none; width: 100%; }
-  /* Botones teléfono */
-  .phone-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
-  .phone-num { font-size: 0.78rem; color: var(--primary-dark); font-weight: 700; }
-  .btn-phone { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; cursor: pointer; border: none; transition: all .2s; }
-  .btn-copy { background: #FED7AA; color: #C2410C; }
-  .btn-copy:hover { background: #FDBA74; }
-  .btn-copy.copied { background: var(--success-light); color: var(--success); }
-  .btn-wa { background: #DCFCE7; color: #16A34A; }
-  .btn-wa:hover { background: #BBF7D0; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-brand">
-    <span>🏠</span>
+    <img src="data:image/png;base64,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" alt="logo" />
     Victory Kids
   </div>
   <div class="topbar-nav">
@@ -152,6 +157,7 @@
       <div id="room-alert"></div>
     </div>
   </div>
+
   <div id="step-form" style="display:none">
     <div class="card slide-up">
       <div class="section-title">✏️ Datos del niño</div>
@@ -166,7 +172,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">Sala asignada</label>
-          <input class="form-input" id="f-room-display" readonly style="background:#F5F5F4;color:var(--muted);">
+          <input class="form-input" id="f-room-display" readonly style="background:#F5F5F4; color:var(--muted);">
         </div>
       </div>
       <div class="form-group">
@@ -178,12 +184,13 @@
         <input class="form-input" id="f-phone" type="tel" placeholder="Ej: +54 9 11 1234 5678">
       </div>
       <div id="form-alert"></div>
-      <div style="display:flex;gap:10px;margin-top:8px;">
-        <button class="btn btn-ghost" onclick="showStep('rooms')" style="width:auto;padding:14px 20px;">← Volver</button>
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn btn-ghost" onclick="showStep('rooms')" style="width:auto; padding:14px 20px;">← Volver</button>
         <button class="btn btn-primary" onclick="submitRegistration()">Registrar ✓</button>
       </div>
     </div>
   </div>
+
   <div id="step-ticket" style="display:none">
     <div class="ticket pop" id="ticket-box"></div>
     <div style="margin-top:16px;">
@@ -202,7 +209,7 @@
   </div>
   <div class="stats-row" id="stats-row"></div>
   <div class="room-filter" id="room-filter">
-    <button class="filter-pill active" onclick="filterRoom('all',this)">Todas las salas</button>
+    <button class="filter-pill active" onclick="filterRoom('all', this)">Todas las salas</button>
   </div>
   <div class="card">
     <div class="section-title">👦 Niños registrados</div>
@@ -220,8 +227,10 @@
   </div>
   <div class="card">
     <div class="section-title">🔢 Código de retiro</div>
-    <input class="checkout-input" id="checkout-code" type="text" maxlength="4" placeholder="0000" oninput="this.value=this.value.toUpperCase()">
-    <button class="btn btn-primary" onclick="doCheckout()">Buscar y retirar →</button>
+    <div class="checkout-box" style="flex-direction:column; align-items:stretch;">
+      <input class="checkout-input" id="checkout-code" type="text" maxlength="4" placeholder="0000" oninput="this.value=this.value.toUpperCase()">
+      <button class="btn btn-primary" onclick="doCheckout()" style="margin-top:10px;">Buscar y retirar →</button>
+    </div>
     <div id="checkout-result"></div>
   </div>
   <div class="card">
@@ -230,26 +239,15 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="password-modal">
-  <div class="modal-box">
-    <div class="modal-icon" id="modal-icon">🔐</div>
-    <div class="modal-title" id="modal-title">Acceso encargados</div>
-    <div class="modal-subtitle" id="modal-subtitle">Ingresa la contraseña para continuar</div>
-    <input class="modal-input" id="modal-pwd" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter') checkPassword()">
-    <div class="modal-error" id="modal-error"></div>
-    <button class="modal-btn" onclick="checkPassword()">Entrar →</button>
-    <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
-  </div>
-</div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
+
 const ROOMS = [
-  { id:'guarderia1', name:'Bebés',          ageMin:1,  ageMax:3,  capacity:10, emoji:'🍼', color:'#FCE7F3' },
-  { id:'guarderia2', name:'Pequeños',        ageMin:4,  ageMax:5,  capacity:30, emoji:'🧸', color:'#FEF9C3' },
-  { id:'guarderia3', name:'Niños',           ageMin:6,  ageMax:7,  capacity:30, emoji:'⚽', color:'#DBEAFE' },
-  { id:'guarderia4', name:'Preadolescentes', ageMin:8,  ageMax:11, capacity:40, emoji:'🎮', color:'#F0FDF4' },
+  { id: 'guarderia1', name: 'Bebés',          ageMin: 1,  ageMax: 3,  capacity: 10, emoji: '🍼', color: '#FCE7F3' },
+  { id: 'guarderia2', name: 'Pequeños',        ageMin: 4,  ageMax: 5,  capacity: 30, emoji: '🧸', color: '#FEF9C3' },
+  { id: 'guarderia3', name: 'Niños',           ageMin: 6,  ageMax: 7,  capacity: 30, emoji: '⚽', color: '#DBEAFE' },
+  { id: 'guarderia4', name: 'Preadolescentes', ageMin: 8,  ageMax: 11, capacity: 40, emoji: '🎮', color: '#F0FDF4' },
 ];
 
 const firebaseConfig = {
@@ -267,7 +265,7 @@ const stateRef = db.ref('vk_state');
 
 let state = {
   registrations: [],
-  sessionDate: new Date().toLocaleDateString('es-AR', {weekday:'long',day:'numeric',month:'long'}),
+  sessionDate: new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' }),
   selectedRoom: null,
 };
 
@@ -279,8 +277,10 @@ stateRef.on('value', (snap) => {
   } else {
     state.registrations = [];
   }
-  if (document.getElementById('view-panel')?.classList.contains('active')) renderPanel();
-  if (document.getElementById('view-checkout')?.classList.contains('active')) renderPending();
+  const panelActive = document.getElementById('view-panel')?.classList.contains('active');
+  const checkoutActive = document.getElementById('view-checkout')?.classList.contains('active');
+  if (panelActive) renderPanel();
+  if (checkoutActive) renderPending();
   renderRooms();
 });
 
@@ -298,23 +298,25 @@ function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return state.registrations.some(r => r.code === code) ? generateCode() : code;
+  if (state.registrations.some(r => r.code === code)) return generateCode();
+  return code;
 }
 
 function showView(v) {
-  document.querySelectorAll('.view,.panel-view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.view, .panel-view').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('view-' + v)?.classList.add('active');
-  const btns = {register:0, panel:1, checkout:2};
+  const el = document.getElementById('view-' + v);
+  if (el) el.classList.add('active');
+  const btns = { register: 0, panel: 1, checkout: 2 };
   document.querySelectorAll('.nav-btn')[btns[v]]?.classList.add('active');
   if (v === 'panel') renderPanel();
   if (v === 'checkout') renderPending();
 }
 
 function showStep(step) {
-  document.getElementById('step-rooms').style.display  = step==='rooms'  ? '' : 'none';
-  document.getElementById('step-form').style.display   = step==='form'   ? '' : 'none';
-  document.getElementById('step-ticket').style.display = step==='ticket' ? '' : 'none';
+  document.getElementById('step-rooms').style.display = step === 'rooms' ? '' : 'none';
+  document.getElementById('step-form').style.display = step === 'form' ? '' : 'none';
+  document.getElementById('step-ticket').style.display = step === 'ticket' ? '' : 'none';
 }
 
 function renderRooms() {
@@ -323,11 +325,12 @@ function renderRooms() {
   grid.innerHTML = ROOMS.map(room => {
     const count = getRoomCount(room.id);
     const full = count >= room.capacity;
-    return `<div class="room-chip ${full?'full':'available'}" onclick="${full?'':``selectRoom('${room.id}')``}" id="chip-${room.id}">
+    return `
+    <div class="room-chip ${full ? 'full' : 'available'}" onclick="${full ? '' : `selectRoom('${room.id}')`}" id="chip-${room.id}">
       <div style="font-size:1.8rem">${room.emoji}</div>
       <div class="room-chip-name">${room.name}</div>
       <div class="room-chip-age">${room.ageMin}–${room.ageMax} años</div>
-      <div class="room-chip-cupo">${full ? '🔴 Sin cupo' : `✅ ${room.capacity-count} cupos`}</div>
+      <div class="room-chip-cupo">${full ? '🔴 Sin cupo' : `✅ ${room.capacity - count} cupos`}</div>
     </div>`;
   }).join('');
 }
@@ -335,35 +338,44 @@ function renderRooms() {
 function selectRoom(roomId) {
   state.selectedRoom = ROOMS.find(r => r.id === roomId);
   document.querySelectorAll('.room-chip').forEach(c => c.classList.remove('selected'));
-  document.getElementById('chip-'+roomId)?.classList.add('selected');
+  document.getElementById('chip-' + roomId)?.classList.add('selected');
   document.getElementById('f-room-display').value = state.selectedRoom.name;
   setTimeout(() => showStep('form'), 300);
 }
 
 function submitRegistration() {
-  const childName  = document.getElementById('f-childname').value.trim();
-  const age        = parseInt(document.getElementById('f-age').value);
+  const childName = document.getElementById('f-childname').value.trim();
+  const age = parseInt(document.getElementById('f-age').value);
   const parentName = document.getElementById('f-parentname').value.trim();
-  const phone      = document.getElementById('f-phone').value.trim();
-  const alertEl    = document.getElementById('form-alert');
+  const phone = document.getElementById('f-phone').value.trim();
+  const alertEl = document.getElementById('form-alert');
 
   if (!childName || !parentName || isNaN(age) || !phone) {
-    alertEl.innerHTML = `<div class="alert alert-danger">⚠️ Por favor completa todos los campos obligatorios.</div>`; return;
+    alertEl.innerHTML = `<div class="alert alert-danger">⚠️ Por favor completa todos los campos obligatorios.</div>`;
+    return;
   }
   const correctRoom = getRoomByAge(age);
   if (!correctRoom || correctRoom.id !== state.selectedRoom.id) {
-    alertEl.innerHTML = `<div class="alert alert-warning">⚠️ La edad (${age} años) no coincide con la sala. Sala correcta: ${correctRoom ? correctRoom.name : 'fuera de rango'}.</div>`; return;
+    alertEl.innerHTML = `<div class="alert alert-warning">⚠️ La edad (${age} años) no coincide con la sala. Sala correcta: ${correctRoom ? correctRoom.name : 'fuera de rango'}.</div>`;
+    return;
   }
-  if (getRoomCount(state.selectedRoom.id) >= state.selectedRoom.capacity) {
-    alertEl.innerHTML = `<div class="alert alert-danger">🔴 La sala <strong>${state.selectedRoom.name}</strong> no tiene cupo.</div>`; return;
+  const count = getRoomCount(state.selectedRoom.id);
+  if (count >= state.selectedRoom.capacity) {
+    alertEl.innerHTML = `<div class="alert alert-danger">🔴 La sala <strong>${state.selectedRoom.name}</strong> no tiene cupo disponible.</div>`;
+    return;
   }
+
+  const code = generateCode();
   const reg = {
-    id: Date.now(), code: generateCode(),
-    childName, age, parentName, phone,
-    room: state.selectedRoom.id, roomName: state.selectedRoom.name, emoji: state.selectedRoom.emoji,
-    time: new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}),
+    id: Date.now(),
+    code, childName, age, parentName, phone,
+    room: state.selectedRoom.id,
+    roomName: state.selectedRoom.name,
+    emoji: state.selectedRoom.emoji,
+    time: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
     checkedOut: false,
   };
+
   state.registrations.push(reg);
   saveState();
   renderTicket(reg);
@@ -377,11 +389,15 @@ function renderTicket(reg) {
     <div class="ticket-code">${reg.code}</div>
     <div class="ticket-name">👦 ${reg.childName}, ${reg.age} años</div>
     <div><span class="ticket-room">${reg.emoji} Sala: ${reg.roomName}</span></div>
-    <div class="ticket-warn">⚠️ Guarda este código — lo necesitarás para retirar a tu hijo</div>`;
+    <div class="ticket-warn">⚠️ Guarda este código — lo necesitarás para retirar a tu hijo</div>
+  `;
 }
 
 function newRegistration() {
-  ['f-childname','f-age','f-parentname','f-phone'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-childname').value = '';
+  document.getElementById('f-age').value = '';
+  document.getElementById('f-parentname').value = '';
+  document.getElementById('f-phone').value = '';
   document.getElementById('form-alert').innerHTML = '';
   state.selectedRoom = null;
   renderRooms();
@@ -392,22 +408,24 @@ let currentFilter = 'all';
 
 function renderPanel() {
   document.getElementById('session-date').textContent = state.sessionDate;
-  const total  = state.registrations.length;
+  const total = state.registrations.length;
   const active = state.registrations.filter(r => !r.checkedOut).length;
-  const out    = state.registrations.filter(r =>  r.checkedOut).length;
-  const ru     = new Set(state.registrations.map(r => r.room)).size;
+  const out = state.registrations.filter(r => r.checkedOut).length;
+  const rooms_used = [...new Set(state.registrations.map(r => r.room))].length;
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--success)">${active}</div><div class="stat-label">En sala</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--muted)">${out}</div><div class="stat-label">Retirados</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${ru}</div><div class="stat-label">Salas</div></div>`;
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${rooms_used}</div><div class="stat-label">Salas</div></div>
+  `;
+  const filterDiv = document.getElementById('room-filter');
   const activeRooms = [...new Set(state.registrations.map(r => r.room))];
   const roomBtns = activeRooms.map(rid => {
     const room = ROOMS.find(r => r.id === rid);
-    return `<button class="filter-pill ${currentFilter===rid?'active':''}" onclick="filterRoom('${rid}',this)">${room.emoji} ${room.name} (${getRoomCount(rid)})</button>`;
+    const count = getRoomCount(rid);
+    return `<button class="filter-pill ${currentFilter === rid ? 'active' : ''}" onclick="filterRoom('${rid}', this)">${room.emoji} ${room.name} (${count})</button>`;
   }).join('');
-  document.getElementById('room-filter').innerHTML =
-    `<button class="filter-pill ${currentFilter==='all'?'active':''}" onclick="filterRoom('all',this)">Todas</button>` + roomBtns;
+  filterDiv.innerHTML = `<button class="filter-pill ${currentFilter === 'all' ? 'active' : ''}" onclick="filterRoom('all', this)">Todas</button>` + roomBtns;
   renderKidsList();
 }
 
@@ -422,54 +440,30 @@ function renderKidsList() {
   const list = document.getElementById('kids-list');
   let regs = state.registrations;
   if (currentFilter !== 'all') regs = regs.filter(r => r.room === currentFilter);
-  if (!regs.length) { list.innerHTML = `<div class="empty"><div class="empty-icon">🌟</div><p>Sin registros en esta sala</p></div>`; return; }
+  if (!regs.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🌟</div><p>Sin registros en esta sala</p></div>`;
+    return;
+  }
   list.innerHTML = regs.map(reg => {
     const room = ROOMS.find(r => r.id === reg.room);
-    const phoneHtml = reg.phone ? `
-      <div class="phone-row">
-        <span class="phone-num">📞 ${reg.phone}</span>
-        <button class="btn-phone btn-copy" id="cp${reg.id}" onclick="copyPhone('${reg.phone}','cp${reg.id}')">📋 Copiar</button>
-        <button class="btn-phone btn-wa" onclick="openWhatsApp('${reg.phone}')">💬 WhatsApp</button>
-      </div>` : '';
     return `
-    <div class="kid-row ${reg.checkedOut?'checked-out':''}" id="row-${reg.id}">
-      <div class="kid-avatar" style="background:${room?.color||'#F5F5F4'}">${reg.emoji}</div>
+    <div class="kid-row ${reg.checkedOut ? 'checked-out' : ''}" id="row-${reg.id}">
+      <div class="kid-avatar" style="background:${room?.color || '#F5F5F4'}">${reg.emoji}</div>
       <div class="kid-info">
         <div class="kid-name">${reg.childName}</div>
         <div class="kid-detail">${reg.age} años · ${reg.parentName} · ${reg.time}</div>
-        ${phoneHtml}
+        ${reg.phone ? `<div class="kid-phone">📞 ${reg.phone}</div>` : ''}
         <div style="margin-top:4px">
           <span class="badge-room">${reg.roomName}</span>
-          <span class="badge ${reg.checkedOut?'badge-out':'badge-active'}" style="margin-left:4px">${reg.checkedOut?'Retirado':'✅ En sala'}</span>
+          <span class="badge ${reg.checkedOut ? 'badge-out' : 'badge-active'}" style="margin-left:4px">${reg.checkedOut ? 'Retirado' : '✅ En sala'}</span>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div class="kid-code">${reg.code}</div>
         ${!reg.checkedOut ? `<button class="btn-success-sm" onclick="checkoutById(${reg.id})">Retirar</button>` : ''}
       </div>
     </div>`;
   }).join('');
-}
-
-// ── Teléfono ──────────────────────────────────────────────────────────────────
-function copyPhone(phone, btnId) {
-  const btn = document.getElementById(btnId);
-  const done = () => {
-    if (!btn) return;
-    btn.textContent = '✅ Copiado';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '📋 Copiar'; btn.classList.remove('copied'); }, 2000);
-  };
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(phone).then(done).catch(() => { fallbackCopy(phone); done(); });
-  } else { fallbackCopy(phone); done(); }
-}
-function fallbackCopy(text) {
-  const ta = document.createElement('textarea');
-  ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-}
-function openWhatsApp(phone) {
-  window.open('https://wa.me/' + phone.replace(/[\s\-\+\(\)]/g,''), '_blank');
 }
 
 function checkoutById(id) {
@@ -491,18 +485,29 @@ function clearSession() {
 
 function executeClearSession() {
   state.registrations = [];
-  state.sessionDate = new Date().toLocaleDateString('es-AR', {weekday:'long',day:'numeric',month:'long'});
-  saveState(); renderPanel();
+  state.sessionDate = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+  saveState();
+  renderPanel();
 }
 
 function doCheckout() {
   const code = document.getElementById('checkout-code').value.trim().toUpperCase();
   const result = document.getElementById('checkout-result');
-  if (!code || code.length < 4) { result.innerHTML = `<div class="alert alert-warning">⚠️ Ingresa el código de 4 caracteres.</div>`; return; }
+  if (!code || code.length < 4) {
+    result.innerHTML = `<div class="alert alert-warning">⚠️ Ingresa el código de 4 caracteres.</div>`;
+    return;
+  }
   const reg = state.registrations.find(r => r.code === code);
-  if (!reg) { result.innerHTML = `<div class="alert alert-danger">❌ Código no encontrado.</div>`; return; }
-  if (reg.checkedOut) { result.innerHTML = `<div class="alert alert-info">ℹ️ <strong>${reg.childName}</strong> ya fue retirado.</div>`; return; }
-  reg.checkedOut = true; saveState();
+  if (!reg) {
+    result.innerHTML = `<div class="alert alert-danger">❌ Código no encontrado.</div>`;
+    return;
+  }
+  if (reg.checkedOut) {
+    result.innerHTML = `<div class="alert alert-info">ℹ️ <strong>${reg.childName}</strong> ya fue retirado.</div>`;
+    return;
+  }
+  reg.checkedOut = true;
+  saveState();
   result.innerHTML = `<div class="alert alert-success pop">✅ <strong>${reg.childName}</strong> entregado a ${reg.parentName} correctamente.</div>`;
   document.getElementById('checkout-code').value = '';
   renderPending();
@@ -511,29 +516,35 @@ function doCheckout() {
 function renderPending() {
   const list = document.getElementById('pending-list');
   const pending = state.registrations.filter(r => !r.checkedOut);
-  if (!pending.length) { list.innerHTML = `<div class="empty"><div class="empty-icon">🎉</div><p>Todos los niños fueron retirados</p></div>`; return; }
+  if (!pending.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🎉</div><p>Todos los niños fueron retirados</p></div>`;
+    return;
+  }
   list.innerHTML = pending.map(reg => `
-    <div class="kid-row">
+    <div class="kid-row" style="margin-bottom:0">
       <div class="kid-avatar" style="font-size:1.4rem">👦</div>
       <div class="kid-info">
         <div class="kid-name">${reg.childName}</div>
         <div class="kid-detail">${reg.roomName} · ${reg.parentName}</div>
-        ${reg.phone ? `<div style="font-size:0.78rem;color:var(--primary-dark);font-weight:700;margin-top:2px;">📞 ${reg.phone}</div>` : ''}
+        ${reg.phone ? `<div class="kid-phone">📞 ${reg.phone}</div>` : ''}
       </div>
       <div class="kid-code">${reg.code}</div>
       <button class="btn-success-sm" onclick="checkoutFromPending(${reg.id})">Retirar</button>
-    </div>`).join('');
+    </div>
+  `).join('');
 }
 
 function checkoutFromPending(id) {
   const reg = state.registrations.find(r => r.id === id);
   if (reg) { reg.checkedOut = true; saveState(); }
   renderPending();
-  document.getElementById('checkout-result').innerHTML = `<div class="alert alert-success pop">✅ <strong>${reg?.childName}</strong> retirado correctamente.</div>`;
+  document.getElementById('checkout-result').innerHTML = `<div class="alert alert-success pop">✅ <strong>${reg.childName}</strong> retirado correctamente.</div>`;
 }
 
 const STAFF_PASSWORD = 'victory2024';
-let pendingView = null, pendingAction = null, staffUnlocked = false;
+let pendingView = null;
+let pendingAction = null;
+let staffUnlocked = false;
 
 renderRooms();
 showStep('rooms');
@@ -547,6 +558,7 @@ function requestAccess(view) {
   setTimeout(() => document.getElementById('modal-pwd').focus(), 100);
 }
 
+// ✅ FIX: guardamos action y view ANTES de cerrar el modal
 function checkPassword() {
   const pwd = document.getElementById('modal-pwd').value;
   if (pwd === STAFF_PASSWORD) {
@@ -570,11 +582,25 @@ function checkPassword() {
 
 function closeModal() {
   document.getElementById('password-modal').classList.remove('open');
-  pendingView = null; pendingAction = null;
+  pendingView = null;
+  pendingAction = null;
   document.getElementById('modal-icon').textContent = '🔐';
   document.getElementById('modal-title').textContent = 'Acceso encargados';
   document.getElementById('modal-subtitle').textContent = 'Ingresa la contraseña para continuar';
 }
+
 </script>
+
+<div class="modal-overlay" id="password-modal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon">🔐</div>
+    <div class="modal-title" id="modal-title">Acceso encargados</div>
+    <div class="modal-subtitle" id="modal-subtitle">Ingresa la contraseña para continuar</div>
+    <input class="modal-input" id="modal-pwd" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter') checkPassword()">
+    <div class="modal-error" id="modal-error"></div>
+    <button class="modal-btn" onclick="checkPassword()">Entrar →</button>
+    <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
 </body>
 </html>
