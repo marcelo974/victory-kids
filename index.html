@@ -649,8 +649,11 @@ function executeClearSession() {
 
 // ── Configuración ─────────────────────────────────────────────────────────────
 function setRegistration(enabled) {
-  appConfig.registrationEnabled = enabled;
+  appConfig = { registrationEnabled: enabled };
   configRef.set(appConfig);
+  // Actualizar UI inmediatamente sin esperar a Firebase
+  updateConfigUI();
+  checkLockscreen();
   var msg = enabled
     ? '<div class="alert alert-success">✅ Registro habilitado. Los padres ya pueden registrar niños.</div>'
     : '<div class="alert alert-danger">🔒 Registro bloqueado. Los padres no pueden registrar niños.</div>';
@@ -669,10 +672,8 @@ function updateConfigUI() {
 // ── Lockscreen ────────────────────────────────────────────────────────────────
 function checkLockscreen() {
   var lock = document.getElementById('lockscreen');
-  var registerActive = document.getElementById('view-register').classList.contains('active');
-  var enabled = appConfig.registrationEnabled !== false; // true por defecto
-  if (enabled || !registerActive) { lock.style.display='none'; return; }
-  lock.style.display='flex';
+  var enabled = appConfig.registrationEnabled !== false;
+  lock.style.display = enabled ? 'none' : 'flex';
 }
 
 // ── Acceso staff ──────────────────────────────────────────────────────────────
