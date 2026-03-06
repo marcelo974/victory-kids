@@ -302,8 +302,8 @@
 <div id="lockscreen">
   <div style="font-size:4rem;margin-bottom:16px;">🔒</div>
   <div style="font-family:'Fredoka One',cursive;font-size:2rem;margin-bottom:8px;">Registro no disponible</div>
-  <div style="font-size:0.95rem;opacity:0.85;font-weight:600;margin-bottom:24px;">El equipo habilitará el registro en breve</div>
-  <div style="font-size:0.8rem;opacity:0.65;font-weight:600;">Iglesia de la Victoria</div>
+  <div style="font-size:0.95rem;opacity:0.85;font-weight:600;margin-bottom:32px;">El equipo habilitará el registro en breve</div>
+  <button onclick="lockscreenStaffAccess()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;padding:10px 22px;border-radius:30px;cursor:pointer;">🔐 Acceso staff</button>
 </div>
 
 <!-- MODAL CONTRASEÑA -->
@@ -673,7 +673,20 @@ function updateConfigUI() {
 function checkLockscreen() {
   var lock = document.getElementById('lockscreen');
   var enabled = appConfig.registrationEnabled !== false;
-  lock.style.display = enabled ? 'none' : 'flex';
+  if (enabled || staffUnlocked) { lock.style.display='none'; return; }
+  lock.style.display='flex';
+}
+
+function lockscreenStaffAccess() {
+  if (staffUnlocked) { document.getElementById('lockscreen').style.display='none'; showView('config'); return; }
+  pendingView='config'; pendingAction=null;
+  document.getElementById('modal-pwd').value='';
+  document.getElementById('modal-error').textContent='';
+  document.getElementById('modal-icon').textContent='🔐';
+  document.getElementById('modal-title').textContent='Acceso encargados';
+  document.getElementById('modal-subtitle').textContent='Ingresá la contraseña para continuar';
+  document.getElementById('password-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('modal-pwd').focus(); },100);
 }
 
 // ── Acceso staff ──────────────────────────────────────────────────────────────
@@ -694,6 +707,7 @@ function checkPassword() {
   var pwd=document.getElementById('modal-pwd').value;
   if (pwd===STAFF_PASSWORD) {
     staffUnlocked=true;
+    document.getElementById('lockscreen').style.display='none';
     var action=pendingAction, view=pendingView;  // guardar ANTES de closeModal
     closeModal();
     if (action==='clearSession') {
