@@ -165,7 +165,6 @@
   .modal-cancel { display: block; margin-top: 10px; color: var(--muted); font-size: 0.8rem; font-weight: 700; cursor: pointer; background: none; border: none; width: 100%; }
 
   #lockscreen { display: none; position: fixed; inset: 0; background: linear-gradient(135deg,#F97316,#C2410C); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; padding: 32px; }
-  .lockscreen-countdown { font-family: 'Fredoka One', cursive; font-size: 3.5rem; letter-spacing: 4px; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 20px 32px; margin-bottom: 24px; min-width: 260px; }
 </style>
 </head>
 <body>
@@ -288,35 +287,23 @@
     <p>Administración del sistema</p>
   </div>
   <div class="card">
-    <div class="section-title">🕐 Horario de habilitación de registros</div>
-    <p style="font-size:0.85rem;color:var(--muted);font-weight:600;margin-bottom:16px;">
-      Los padres no podrán registrar niños hasta la fecha y hora configurada.
-      Al llegar ese momento el registro se habilita automáticamente en todos los dispositivos.
+    <div class="section-title">🚦 Control de registros</div>
+    <p style="font-size:0.85rem;color:var(--muted);font-weight:600;margin-bottom:20px;">
+      Habilitá o bloqueá el registro de niños manualmente. El cambio se aplica en todos los dispositivos de inmediato.
     </p>
-    <div id="cfg-current" style="margin-bottom:14px;"></div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">📅 Fecha</label>
-        <input class="form-input" type="date" id="cfg-date">
-      </div>
-      <div class="form-group">
-        <label class="form-label">🕐 Hora (local)</label>
-        <input class="form-input" type="time" id="cfg-time">
-      </div>
-    </div>
-    <div id="cfg-status" style="margin-bottom:12px;"></div>
-    <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar configuración</button>
-    <button class="btn btn-danger"  onclick="clearConfig()" style="margin-top:10px;">🗑️ Quitar restricción</button>
+    <div id="cfg-current" style="margin-bottom:20px;"></div>
+    <button class="btn btn-primary" id="btn-enable-reg"  onclick="setRegistration(true)"  style="margin-bottom:10px;">✅ Habilitar registro</button>
+    <button class="btn btn-danger"  id="btn-disable-reg" onclick="setRegistration(false)">🔒 Bloquear registro</button>
+    <div id="cfg-status" style="margin-top:14px;"></div>
   </div>
 </div>
 
 <!-- LOCKSCREEN -->
 <div id="lockscreen">
-  <div style="font-size:4rem;margin-bottom:16px;">⏳</div>
+  <div style="font-size:4rem;margin-bottom:16px;">🔒</div>
   <div style="font-family:'Fredoka One',cursive;font-size:2rem;margin-bottom:8px;">Registro no disponible</div>
-  <div style="font-size:0.95rem;opacity:0.85;font-weight:600;margin-bottom:24px;">El registro se habilitará en:</div>
-  <div class="lockscreen-countdown" id="countdown-display">--:--:--</div>
-  <div style="font-size:0.85rem;opacity:0.75;font-weight:600;margin-top:8px;" id="lockscreen-date"></div>
+  <div style="font-size:0.95rem;opacity:0.85;font-weight:600;margin-bottom:24px;">El equipo habilitará el registro en breve</div>
+  <div style="font-size:0.8rem;opacity:0.65;font-weight:600;">Iglesia de la Victoria</div>
 </div>
 
 <!-- MODAL CONTRASEÑA -->
@@ -363,7 +350,7 @@ var state = {
   registrations: [],
   sessionDate: new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})
 };
-var appConfig     = { enabledFrom: null };
+var appConfig     = { registrationEnabled: true };
 var selectedRoom  = null;
 var staffUnlocked = false;
 var pendingView   = null;
@@ -385,7 +372,12 @@ stateRef.on('value', function(snap) {
 });
 
 configRef.on('value', function(snap) {
-  appConfig = snap.val() || { enabledFrom: null };
+  var data = snap.val();
+  appConfig = data || { registrationEnabled: true };
+  // Migración: si existía enabledFrom del sistema viejo, ignorarlo
+  if (!data || data.registrationEnabled === undefined) {
+    appConfig.registrationEnabled = true;
+  }
   checkLockscreen();
   updateConfigUI();
 });
@@ -656,80 +648,32 @@ function executeClearSession() {
 }
 
 // ── Configuración ─────────────────────────────────────────────────────────────
-function saveConfig() {
-  var d = document.getElementById('cfg-date').value;
-  var t = document.getElementById('cfg-time').value;
-  if (!d||!t) { document.getElementById('cfg-status').innerHTML='<div class="alert alert-warning">⚠️ Completá fecha y hora.</div>'; return; }
-
-  // ✅ FIX TIMEZONE: new Date(y,m,d,h,min) siempre usa hora LOCAL
-  var p = d.split('-').map(Number);
-  var q = t.split(':').map(Number);
-  var dt = new Date(p[0], p[1]-1, p[2], q[0], q[1], 0);
-
-  appConfig.enabledFrom = dt.toISOString();
+function setRegistration(enabled) {
+  appConfig.registrationEnabled = enabled;
   configRef.set(appConfig);
-  document.getElementById('cfg-status').innerHTML =
-    '<div class="alert alert-success">✅ Guardado. Habilitación: <strong>'+dt.toLocaleString('es-AR')+'</strong></div>';
-}
-
-function clearConfig() {
-  appConfig.enabledFrom=null;
-  configRef.set(appConfig);
-  document.getElementById('cfg-status').innerHTML='<div class="alert alert-info">ℹ️ Restricción eliminada. El registro está habilitado.</div>';
-  document.getElementById('cfg-date').value='';
-  document.getElementById('cfg-time').value='';
-  document.getElementById('cfg-current').innerHTML='';
+  var msg = enabled
+    ? '<div class="alert alert-success">✅ Registro habilitado. Los padres ya pueden registrar niños.</div>'
+    : '<div class="alert alert-danger">🔒 Registro bloqueado. Los padres no pueden registrar niños.</div>';
+  document.getElementById('cfg-status').innerHTML = msg;
 }
 
 function updateConfigUI() {
   var cur = document.getElementById('cfg-current');
   if (!cur) return;
-  if (!appConfig.enabledFrom) {
-    cur.innerHTML='<div class="alert alert-success">✅ Registro habilitado (sin restricción)</div>'; return;
-  }
-  var dt=new Date(appConfig.enabledFrom), now=new Date();
-  cur.innerHTML = now>=dt
-    ? '<div class="alert alert-success">✅ Registro habilitado desde '+dt.toLocaleString('es-AR')+'</div>'
-    : '<div class="alert alert-warning">⏳ Bloqueado hasta el '+dt.toLocaleString('es-AR')+'</div>';
-
-  var cfgDate=document.getElementById('cfg-date');
-  var cfgTime=document.getElementById('cfg-time');
-  if (cfgDate && !cfgDate.value) {
-    // Mostrar en hora local: restar offset para cancelar la conversión UTC→local del input
-    var local = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString();
-    cfgDate.value = local.slice(0,10);
-    cfgTime.value = local.slice(11,16);
-  }
+  var enabled = appConfig.registrationEnabled !== false; // true por defecto si no está seteado
+  cur.innerHTML = enabled
+    ? '<div class="alert alert-success">✅ El registro está <strong>habilitado</strong></div>'
+    : '<div class="alert alert-danger">🔒 El registro está <strong>bloqueado</strong></div>';
 }
 
 // ── Lockscreen ────────────────────────────────────────────────────────────────
 function checkLockscreen() {
   var lock = document.getElementById('lockscreen');
   var registerActive = document.getElementById('view-register').classList.contains('active');
-  if (!appConfig.enabledFrom || !registerActive) { lock.style.display='none'; return; }
-  var enabledAt = new Date(appConfig.enabledFrom);
-  if (new Date() >= enabledAt) { lock.style.display='none'; return; }
+  var enabled = appConfig.registrationEnabled !== false; // true por defecto
+  if (enabled || !registerActive) { lock.style.display='none'; return; }
   lock.style.display='flex';
-  document.getElementById('lockscreen-date').textContent =
-    'Se habilitará el ' + enabledAt.toLocaleString('es-AR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 }
-
-// Cuenta regresiva — cada segundo
-setInterval(function() {
-  if (!appConfig.enabledFrom) return;
-  var enabledAt = new Date(appConfig.enabledFrom);
-  var diff = enabledAt - new Date();
-  if (diff <= 0) {
-    // ✅ Tiempo cumplido: habilitar registro sin recargar
-    appConfig.enabledFrom = null;
-    document.getElementById('lockscreen').style.display='none';
-    document.getElementById('countdown-display').textContent='--:--:--';
-    return;
-  }
-  var h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
-  var el=document.getElementById('countdown-display');
-  if (el) el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-}, 1000);
 
 // ── Acceso staff ──────────────────────────────────────────────────────────────
 function requestAccess(view) {
